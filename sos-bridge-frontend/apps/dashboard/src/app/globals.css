@@ -1,0 +1,253 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 217.2 32.6% 8%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Leaflet fixes for dashboard */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+  border-radius: var(--radius);
+}
+
+.leaflet-control-attribution {
+  font-size: 10px;
+}
+
+/* Status indicator pulse */
+@keyframes status-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.status-pulse {
+  animation: status-pulse 2s ease-in-out infinite;
+}
+
+/* Data table styles */
+.data-table-row:hover {
+  background-color: hsl(var(--muted) / 0.5);
+}
+
+/* ========== MAP GLOWING MARKERS ========== */
+
+/* Victim/Ticket marker - Red pulsing glow */
+@keyframes victim-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 
+      0 0 0 0 rgba(239, 68, 68, 0.7),
+      0 0 20px 5px rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.15);
+    box-shadow: 
+      0 0 0 15px rgba(239, 68, 68, 0),
+      0 0 30px 10px rgba(239, 68, 68, 0.6);
+  }
+}
+
+@keyframes victim-pulse-high {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 
+      0 0 0 0 rgba(220, 38, 38, 0.8),
+      0 0 25px 8px rgba(220, 38, 38, 0.5);
+  }
+  50% {
+    transform: scale(1.2);
+    box-shadow: 
+      0 0 0 20px rgba(220, 38, 38, 0),
+      0 0 40px 15px rgba(220, 38, 38, 0.7);
+  }
+}
+
+.map-marker-victim {
+  border-radius: 50%;
+  animation: victim-pulse 2s ease-in-out infinite;
+}
+
+.map-marker-victim-high {
+  border-radius: 50%;
+  animation: victim-pulse-high 1.5s ease-in-out infinite;
+}
+
+/* Rescuer online marker - Green pulsing glow */
+@keyframes rescuer-online-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 
+      0 0 0 0 rgba(34, 197, 94, 0.6),
+      0 0 15px 4px rgba(34, 197, 94, 0.3);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 
+      0 0 0 10px rgba(34, 197, 94, 0),
+      0 0 25px 8px rgba(34, 197, 94, 0.5);
+  }
+}
+
+.map-marker-rescuer-online {
+  border-radius: 50%;
+  animation: rescuer-online-pulse 2.5s ease-in-out infinite;
+}
+
+/* Rescuer on-mission marker - Blue pulsing glow */
+@keyframes rescuer-mission-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 
+      0 0 0 0 rgba(59, 130, 246, 0.6),
+      0 0 15px 4px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 
+      0 0 0 10px rgba(59, 130, 246, 0),
+      0 0 25px 8px rgba(59, 130, 246, 0.5);
+  }
+}
+
+.map-marker-rescuer-mission {
+  border-radius: 50%;
+  animation: rescuer-mission-pulse 2s ease-in-out infinite;
+}
+
+/* Custom Leaflet circle marker overrides for glowing effect */
+.leaflet-interactive.glowing-victim {
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.8));
+}
+
+.leaflet-interactive.glowing-victim-high {
+  filter: drop-shadow(0 0 12px rgba(220, 38, 38, 1));
+}
+
+.leaflet-interactive.glowing-rescuer-online {
+  filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.7));
+}
+
+.leaflet-interactive.glowing-rescuer-mission {
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.7));
+}
+
+/* Leaflet SVG animation for pulsing circles */
+.leaflet-pane svg .pulsing-circle {
+  animation: svg-pulse 2s ease-in-out infinite;
+}
+
+@keyframes svg-pulse {
+  0%, 100% {
+    r: 8;
+    opacity: 0.9;
+  }
+  50% {
+    r: 12;
+    opacity: 0.6;
+  }
+}
+
+/* Custom glowing marker container - remove default leaflet styles */
+.custom-glowing-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Legend glowing dots preview */
+.legend-dot-victim {
+  animation: victim-pulse 2s ease-in-out infinite;
+}
+
+.legend-dot-rescuer-online {
+  animation: rescuer-online-pulse 2.5s ease-in-out infinite;
+}
+
+.legend-dot-rescuer-mission {
+  animation: rescuer-mission-pulse 2s ease-in-out infinite;
+}
+
+
+
+
+
+
