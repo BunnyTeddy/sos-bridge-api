@@ -1,0 +1,12 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm"]
+
+[phases.install]
+cmds = ["cd sos-bridge-agent && npm ci"]
+
+[phases.build]
+cmds = ["cd sos-bridge-agent && npm run build"]
+
+[start]
+cmd = "cd sos-bridge-agent && npm start"
+
