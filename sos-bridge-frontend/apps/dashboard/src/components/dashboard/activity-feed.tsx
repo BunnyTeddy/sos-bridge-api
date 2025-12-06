@@ -8,6 +8,7 @@ import {
   DollarSign,
   Clock 
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { formatRelativeTime } from '@sos-bridge/ui';
 import type { RescueTicket, Rescuer, RewardTransaction } from '@sos-bridge/types';
 
@@ -36,20 +37,21 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({ activities, maxItems = 10 }: ActivityFeedProps) {
+  const t = useTranslations('activity');
   const displayActivities = activities.slice(0, maxItems);
 
   return (
     <div className="rounded-xl border bg-card">
       <div className="flex items-center justify-between border-b p-4">
-        <h3 className="font-semibold text-foreground">Hoạt động gần đây</h3>
+        <h3 className="font-semibold text-foreground">{t('title')}</h3>
         <button className="text-sm text-primary hover:underline">
-          Xem tất cả
+          {t('viewAll')}
         </button>
       </div>
       <div className="divide-y">
         {displayActivities.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            Chưa có hoạt động nào
+            {t('noActivity')}
           </div>
         ) : (
           displayActivities.map((activity) => {

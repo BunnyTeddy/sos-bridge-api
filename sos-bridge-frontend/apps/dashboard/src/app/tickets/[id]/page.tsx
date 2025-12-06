@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import {
   ArrowLeft,
   MapPin,
@@ -32,24 +33,9 @@ import {
   Spinner,
 } from '@sos-bridge/ui';
 
-// Timeline step definition
-const timelineSteps: {
-  status: TicketStatus;
-  label: string;
-}[] = [
-  { status: 'OPEN', label: 'Đã tiếp nhận' },
-  { status: 'ASSIGNED', label: 'Đã gán đội cứu hộ' },
-  { status: 'IN_PROGRESS', label: 'Đang xử lý' },
-  { status: 'VERIFIED', label: 'Đã xác thực' },
-  { status: 'COMPLETED', label: 'Hoàn thành' },
-];
-
-function getStepIndex(status: TicketStatus): number {
-  const index = timelineSteps.findIndex((s) => s.status === status);
-  return index >= 0 ? index : 0;
-}
-
 export default function TicketDetailPage() {
+  const t = useTranslations('ticketDetail');
+  const tCommon = useTranslations('common');
   const params = useParams();
   const router = useRouter();
   const ticketId = params.id as string;
@@ -58,6 +44,20 @@ export default function TicketDetailPage() {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showUpdateStatusModal, setShowUpdateStatusModal] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+  // Timeline step definition with translations
+  const timelineSteps: { status: TicketStatus; label: string }[] = [
+    { status: 'OPEN', label: t('timeline.received') },
+    { status: 'ASSIGNED', label: t('timeline.assigned') },
+    { status: 'IN_PROGRESS', label: t('timeline.inProgress') },
+    { status: 'VERIFIED', label: t('timeline.verified') },
+    { status: 'COMPLETED', label: t('timeline.completed') },
+  ];
+
+  function getStepIndex(status: TicketStatus): number {
+    const index = timelineSteps.findIndex((s) => s.status === status);
+    return index >= 0 ? index : 0;
+  }
 
   // Fetch ticket
   const { data, isLoading, refetch } = useQuery({
@@ -82,7 +82,7 @@ export default function TicketDetailPage() {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Chi tiết yêu cầu" subtitle="Đang tải...">
+      <DashboardLayout title={t('title')} subtitle={tCommon('loading')}>
         <div className="flex h-64 items-center justify-center">
           <Spinner size="lg" />
         </div>
@@ -92,14 +92,14 @@ export default function TicketDetailPage() {
 
   if (!ticket) {
     return (
-      <DashboardLayout title="Chi tiết yêu cầu" subtitle="Không tìm thấy">
+      <DashboardLayout title={t('title')} subtitle={t('notFound')}>
         <div className="py-12 text-center">
-          <p className="text-muted-foreground">Không tìm thấy yêu cầu này</p>
+          <p className="text-muted-foreground">{t('notFoundMessage')}</p>
           <button
             onClick={() => router.push('/tickets')}
             className="mt-4 text-primary hover:underline"
           >
-            Quay lại danh sách
+            {t('backToList')}
           </button>
         </div>
       </DashboardLayout>
@@ -124,7 +124,7 @@ export default function TicketDetailPage() {
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Quay lại
+          {tCommon('back')}
         </button>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -143,14 +143,14 @@ export default function TicketDetailPage() {
                   className="flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Edit className="h-4 w-4" />
-                  Cập nhật
+                  {t('update')}
                 </button>
               </div>
 
               {/* Timeline */}
               {!isCancelled && (
                 <div className="mt-6">
-                  <h3 className="mb-4 font-semibold">Tiến trình</h3>
+                  <h3 className="mb-4 font-semibold">{t('progress')}</h3>
                   <div className="flex items-center">
                     {timelineSteps.map((step, index) => {
                       const isCompleted = index <= currentStepIndex;
@@ -202,7 +202,7 @@ export default function TicketDetailPage() {
                 <div className="mt-4 rounded-lg bg-red-50 p-4 text-red-700">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5" />
-                    <span className="font-medium">Yêu cầu này đã bị hủy</span>
+                    <span className="font-medium">{t('cancelledNotice')}</span>
                   </div>
                 </div>
               )}
@@ -210,14 +210,14 @@ export default function TicketDetailPage() {
 
             {/* Victim Info */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold">Thông tin nạn nhân</h3>
+              <h3 className="mb-4 font-semibold">{t('victimInfo')}</h3>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
                     <Phone className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Số điện thoại</p>
+                    <p className="text-sm text-muted-foreground">{t('phoneNumber')}</p>
                     <a
                       href={`tel:${ticket.victim_info.phone}`}
                       className="font-medium text-primary hover:underline"
@@ -232,9 +232,9 @@ export default function TicketDetailPage() {
                     <Users className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Số người</p>
+                    <p className="text-sm text-muted-foreground">{t('peopleCount')}</p>
                     <p className="font-medium">
-                      {ticket.victim_info.people_count} người
+                      {t('peopleCountValue', { count: ticket.victim_info.people_count })}
                     </p>
                   </div>
                 </div>
@@ -244,7 +244,7 @@ export default function TicketDetailPage() {
                     <MapPin className="h-5 w-5 text-red-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Vị trí</p>
+                    <p className="text-sm text-muted-foreground">{t('location')}</p>
                     <p className="font-medium">{ticket.location.address_text}</p>
                     <p className="text-sm text-muted-foreground">
                       {ticket.location.lat.toFixed(6)},{' '}
@@ -260,7 +260,7 @@ export default function TicketDetailPage() {
                       className="mt-2 flex items-center gap-1 text-sm text-primary hover:underline"
                     >
                       <Navigation className="h-4 w-4" />
-                      Xem trên bản đồ
+                      {t('viewOnMap')}
                     </button>
                   </div>
                 </div>
@@ -272,22 +272,22 @@ export default function TicketDetailPage() {
                 ticket.victim_info.has_disabled) && (
                 <div className="mt-4 border-t pt-4">
                   <p className="mb-2 text-sm font-medium text-muted-foreground">
-                    Lưu ý đặc biệt
+                    {t('specialNeeds')}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {ticket.victim_info.has_elderly && (
                       <span className="rounded-full bg-orange-100 px-3 py-1 text-sm text-orange-700">
-                        👴 Có người già
+                        👴 {t('hasElderly')}
                       </span>
                     )}
                     {ticket.victim_info.has_children && (
                       <span className="rounded-full bg-pink-100 px-3 py-1 text-sm text-pink-700">
-                        👶 Có trẻ em
+                        👶 {t('hasChildren')}
                       </span>
                     )}
                     {ticket.victim_info.has_disabled && (
                       <span className="rounded-full bg-purple-100 px-3 py-1 text-sm text-purple-700">
-                        ♿ Có người khuyết tật
+                        ♿ {t('hasDisabled')}
                       </span>
                     )}
                   </div>
@@ -305,7 +305,7 @@ export default function TicketDetailPage() {
             {/* Verification */}
             {ticket.verification_image_url && (
               <div className="rounded-xl border bg-card p-6">
-                <h3 className="mb-4 font-semibold">Xác thực cứu hộ</h3>
+                <h3 className="mb-4 font-semibold">{t('verification')}</h3>
                 <div className="flex gap-4">
                   <img
                     src={ticket.verification_image_url}
@@ -324,12 +324,12 @@ export default function TicketDetailPage() {
                         />
                         <span className="font-medium">
                           {ticket.verification_result.is_valid
-                            ? 'Xác thực thành công'
-                            : 'Xác thực thất bại'}
+                            ? t('verificationSuccess')
+                            : t('verificationFailed')}
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        Độ tin cậy:{' '}
+                        {t('confidence')}:{' '}
                         {(ticket.verification_result.confidence_score * 100).toFixed(0)}%
                       </p>
                       {ticket.verification_result.notes && (
@@ -348,7 +348,7 @@ export default function TicketDetailPage() {
           <div className="space-y-6">
             {/* Assigned Rescuer */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold">Đội cứu hộ</h3>
+              <h3 className="mb-4 font-semibold">{t('rescueTeam')}</h3>
               {ticket.assigned_rescuer ? (
                 <div>
                   <div className="mb-4 flex items-center gap-3">
@@ -369,7 +369,7 @@ export default function TicketDetailPage() {
                   </div>
                   <div className="space-y-2 text-sm">
                     <p>
-                      <span className="text-muted-foreground">SĐT:</span>{' '}
+                      <span className="text-muted-foreground">{t('phone')}:</span>{' '}
                       <a
                         href={`tel:${ticket.assigned_rescuer.phone}`}
                         className="text-primary hover:underline"
@@ -378,11 +378,11 @@ export default function TicketDetailPage() {
                       </a>
                     </p>
                     <p>
-                      <span className="text-muted-foreground">Đánh giá:</span>{' '}
+                      <span className="text-muted-foreground">{t('rating')}:</span>{' '}
                       ⭐ {ticket.assigned_rescuer.rating.toFixed(1)}
                     </p>
                     <p>
-                      <span className="text-muted-foreground">Nhiệm vụ:</span>{' '}
+                      <span className="text-muted-foreground">{t('missions')}:</span>{' '}
                       {ticket.assigned_rescuer.completed_missions}
                     </p>
                   </div>
@@ -390,13 +390,13 @@ export default function TicketDetailPage() {
               ) : (
                 <div className="text-center">
                   <User className="mx-auto mb-2 h-12 w-12 text-muted-foreground" />
-                  <p className="mb-3 text-muted-foreground">Chưa gán đội cứu hộ</p>
+                  <p className="mb-3 text-muted-foreground">{t('notAssigned')}</p>
                   <button
                     onClick={() => setShowAssignModal(true)}
                     disabled={!canAssign}
                     className="w-full rounded-lg bg-primary py-2 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Gán ngay
+                    {t('assignNow')}
                   </button>
                 </div>
               )}
@@ -404,12 +404,12 @@ export default function TicketDetailPage() {
 
             {/* Timestamps */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold">Thời gian</h3>
+              <h3 className="mb-4 font-semibold">{t('time')}</h3>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-muted-foreground">Tạo lúc</p>
+                    <p className="text-muted-foreground">{t('createdAt')}</p>
                     <p className="font-medium">{formatDateTime(ticket.created_at)}</p>
                   </div>
                 </div>
@@ -417,7 +417,7 @@ export default function TicketDetailPage() {
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-muted-foreground">Cập nhật</p>
+                      <p className="text-muted-foreground">{t('updatedAt')}</p>
                       <p className="font-medium">
                         {formatDateTime(ticket.updated_at)}
                       </p>
@@ -428,7 +428,7 @@ export default function TicketDetailPage() {
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     <div>
-                      <p className="text-muted-foreground">Hoàn thành</p>
+                      <p className="text-muted-foreground">{t('completedAt')}</p>
                       <p className="font-medium">
                         {formatDateTime(ticket.completed_at)}
                       </p>
@@ -440,21 +440,21 @@ export default function TicketDetailPage() {
 
             {/* Quick Actions */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold">Thao tác</h3>
+              <h3 className="mb-4 font-semibold">{t('actions')}</h3>
               <div className="space-y-2">
                 <button
                   onClick={() => setShowUpdateStatusModal(true)}
                   disabled={isCompleted || isCancelled}
                   className="w-full rounded-lg bg-muted py-2 text-sm font-medium hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Cập nhật trạng thái
+                  {t('updateStatus')}
                 </button>
                 <button
                   onClick={() => setShowCancelDialog(true)}
                   disabled={isCompleted || isCancelled}
                   className="w-full rounded-lg bg-red-100 py-2 text-sm font-medium text-red-700 hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Hủy yêu cầu
+                  {t('cancelRequest')}
                 </button>
               </div>
             </div>
@@ -483,9 +483,9 @@ export default function TicketDetailPage() {
         isOpen={showCancelDialog}
         onClose={() => setShowCancelDialog(false)}
         onConfirm={() => cancelMutation.mutate()}
-        title="Hủy yêu cầu cứu hộ"
-        message={`Bạn có chắc muốn hủy yêu cầu #${ticket.ticket_id.slice(-6)}? Hành động này không thể hoàn tác.`}
-        confirmText="Hủy yêu cầu"
+        title={t('cancelDialogTitle')}
+        message={t('cancelDialogMessage', { id: ticket.ticket_id.slice(-6) })}
+        confirmText={t('cancelRequest')}
         variant="danger"
         isLoading={cancelMutation.isPending}
       />

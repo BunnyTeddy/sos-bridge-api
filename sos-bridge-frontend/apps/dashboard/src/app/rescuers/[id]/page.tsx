@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import {
   ArrowLeft,
   User,
@@ -36,6 +37,8 @@ import {
 } from '@sos-bridge/ui';
 
 export default function RescuerDetailPage() {
+  const t = useTranslations('rescuerDetail');
+  const tCommon = useTranslations('common');
   const params = useParams();
   const router = useRouter();
   const rescuerId = params.id as string;
@@ -84,7 +87,7 @@ export default function RescuerDetailPage() {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Chi tiết đội cứu hộ" subtitle="Đang tải...">
+      <DashboardLayout title={t('title')} subtitle={tCommon('loading')}>
         <div className="flex h-64 items-center justify-center">
           <Spinner size="lg" />
         </div>
@@ -94,15 +97,15 @@ export default function RescuerDetailPage() {
 
   if (!rescuer) {
     return (
-      <DashboardLayout title="Chi tiết đội cứu hộ" subtitle="Không tìm thấy">
+      <DashboardLayout title={t('title')} subtitle={t('notFound')}>
         <div className="py-12 text-center">
           <User className="mx-auto mb-4 h-16 w-16 text-muted-foreground opacity-50" />
-          <p className="text-lg text-muted-foreground">Không tìm thấy đội cứu hộ này</p>
+          <p className="text-lg text-muted-foreground">{t('notFoundMessage')}</p>
           <button
             onClick={() => router.push('/rescuers')}
             className="mt-4 text-primary hover:underline"
           >
-            Quay lại danh sách
+            {t('backToList')}
           </button>
         </div>
       </DashboardLayout>
@@ -125,7 +128,7 @@ export default function RescuerDetailPage() {
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Quay lại
+          {tCommon('back')}
         </button>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -152,7 +155,7 @@ export default function RescuerDetailPage() {
                       <StatusBadge status={rescuer.status} />
                       {isSuspended && (
                         <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700">
-                          Đã tạm ngưng
+                          {t('suspended')}
                         </span>
                       )}
                     </div>
@@ -167,7 +170,7 @@ export default function RescuerDetailPage() {
                       onClick={() => setShowActivateDialog(true)}
                     >
                       <CheckCircle className="mr-1 h-4 w-4" />
-                      Kích hoạt lại
+                      {t('reactivate')}
                     </Button>
                   ) : (
                     <Button
@@ -176,7 +179,7 @@ export default function RescuerDetailPage() {
                       onClick={() => setShowSuspendDialog(true)}
                     >
                       <Ban className="mr-1 h-4 w-4" />
-                      Tạm ngưng
+                      {t('suspend')}
                     </Button>
                   )}
                 </div>
@@ -189,42 +192,42 @@ export default function RescuerDetailPage() {
                   <p className="text-2xl font-bold text-foreground">
                     {rescuer.completed_missions}
                   </p>
-                  <p className="text-xs text-muted-foreground">Nhiệm vụ</p>
+                  <p className="text-xs text-muted-foreground">{t('missions')}</p>
                 </div>
                 <div className="rounded-lg bg-muted p-3 text-center">
                   <Star className="mx-auto mb-1 h-5 w-5 text-yellow-500" />
                   <p className="text-2xl font-bold text-foreground">
                     {rescuer.rating.toFixed(1)}
                   </p>
-                  <p className="text-xs text-muted-foreground">Đánh giá</p>
+                  <p className="text-xs text-muted-foreground">{t('rating')}</p>
                 </div>
                 <div className="rounded-lg bg-muted p-3 text-center">
                   <User className="mx-auto mb-1 h-5 w-5 text-blue-500" />
                   <p className="text-2xl font-bold text-foreground">
                     {rescuer.vehicle_capacity}
                   </p>
-                  <p className="text-xs text-muted-foreground">Sức chứa</p>
+                  <p className="text-xs text-muted-foreground">{t('capacity')}</p>
                 </div>
                 <div className="rounded-lg bg-muted p-3 text-center">
                   <Ticket className="mx-auto mb-1 h-5 w-5 text-green-500" />
                   <p className="text-2xl font-bold text-foreground">
                     {rescuerTickets.length}
                   </p>
-                  <p className="text-xs text-muted-foreground">Tổng ticket</p>
+                  <p className="text-xs text-muted-foreground">{t('totalTickets')}</p>
                 </div>
               </div>
             </div>
 
             {/* Contact Info */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold text-foreground">Thông tin liên hệ</h3>
+              <h3 className="mb-4 font-semibold text-foreground">{t('contactInfo')}</h3>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
                     <Phone className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Số điện thoại</p>
+                    <p className="text-sm text-muted-foreground">{t('phoneNumber')}</p>
                     <a
                       href={`tel:${rescuer.phone}`}
                       className="font-medium text-primary hover:underline"
@@ -242,7 +245,7 @@ export default function RescuerDetailPage() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Telegram ID</p>
+                      <p className="text-sm text-muted-foreground">{t('telegramId')}</p>
                       <p className="font-medium">{rescuer.telegram_user_id}</p>
                     </div>
                   </div>
@@ -253,12 +256,12 @@ export default function RescuerDetailPage() {
                     <MapPin className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Vị trí hiện tại</p>
+                    <p className="text-sm text-muted-foreground">{t('currentLocation')}</p>
                     <p className="font-medium">
                       {rescuer.location.lat.toFixed(6)}, {rescuer.location.lng.toFixed(6)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Cập nhật: {formatRelativeTime(rescuer.location.last_updated)}
+                      {t('updated')}: {formatRelativeTime(rescuer.location.last_updated)}
                     </p>
                     <button
                       onClick={() =>
@@ -270,7 +273,7 @@ export default function RescuerDetailPage() {
                       className="mt-1 flex items-center gap-1 text-sm text-primary hover:underline"
                     >
                       <Navigation className="h-3 w-3" />
-                      Xem trên bản đồ
+                      {t('viewOnMap')}
                     </button>
                   </div>
                 </div>
@@ -282,7 +285,7 @@ export default function RescuerDetailPage() {
               <div className="rounded-xl border border-orange-200 bg-orange-50 p-6">
                 <div className="flex items-center gap-2 text-orange-700">
                   <AlertTriangle className="h-5 w-5" />
-                  <h3 className="font-semibold">Đang thực hiện nhiệm vụ</h3>
+                  <h3 className="font-semibold">{t('activeMission')}</h3>
                 </div>
                 <div className="mt-3">
                   <a
@@ -295,7 +298,7 @@ export default function RescuerDetailPage() {
                     {activeTicket.location.address_text}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {activeTicket.victim_info.people_count} người cần cứu
+                    {t('peopleNeedRescue', { count: activeTicket.victim_info.people_count })}
                   </p>
                 </div>
               </div>
@@ -303,10 +306,10 @@ export default function RescuerDetailPage() {
 
             {/* Mission History */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold text-foreground">Lịch sử nhiệm vụ</h3>
+              <h3 className="mb-4 font-semibold text-foreground">{t('missionHistory')}</h3>
               {rescuerTickets.length === 0 ? (
                 <p className="py-8 text-center text-muted-foreground">
-                  Chưa có nhiệm vụ nào
+                  {t('noMissions')}
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -336,7 +339,7 @@ export default function RescuerDetailPage() {
                   ))}
                   {rescuerTickets.length > 10 && (
                     <p className="text-center text-sm text-muted-foreground">
-                      Và {rescuerTickets.length - 10} nhiệm vụ khác...
+                      {t('andMoreMissions', { count: rescuerTickets.length - 10 })}
                     </p>
                   )}
                 </div>
@@ -348,25 +351,25 @@ export default function RescuerDetailPage() {
           <div className="space-y-6">
             {/* Vehicle Info */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold text-foreground">Phương tiện</h3>
+              <h3 className="mb-4 font-semibold text-foreground">{t('vehicle')}</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Loại xe</span>
+                  <span className="text-muted-foreground">{t('vehicleType')}</span>
                   <span className="font-medium">
                     {VEHICLE_TYPE_EMOJIS[rescuer.vehicle_type]}{' '}
                     {VEHICLE_TYPE_NAMES[rescuer.vehicle_type]}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Sức chứa</span>
-                  <span className="font-medium">{rescuer.vehicle_capacity} người</span>
+                  <span className="text-muted-foreground">{t('capacity')}</span>
+                  <span className="font-medium">{t('peopleCount', { count: rescuer.vehicle_capacity })}</span>
                 </div>
               </div>
             </div>
 
             {/* Wallet Info */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold text-foreground">Ví blockchain</h3>
+              <h3 className="mb-4 font-semibold text-foreground">{t('blockchainWallet')}</h3>
               {rescuer.wallet_address ? (
                 <div>
                   <p className="break-all font-mono text-sm">
@@ -378,29 +381,29 @@ export default function RescuerDetailPage() {
                     rel="noopener noreferrer"
                     className="mt-2 inline-flex items-center gap-1 text-sm text-primary hover:underline"
                   >
-                    Xem trên Explorer
+                    {t('viewOnExplorer')}
                   </a>
                 </div>
               ) : (
-                <p className="text-muted-foreground">Chưa cấu hình</p>
+                <p className="text-muted-foreground">{t('notConfigured')}</p>
               )}
             </div>
 
             {/* Timestamps */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold text-foreground">Thông tin hệ thống</h3>
+              <h3 className="mb-4 font-semibold text-foreground">{t('systemInfo')}</h3>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-muted-foreground">Ngày đăng ký</p>
+                    <p className="text-muted-foreground">{t('registrationDate')}</p>
                     <p className="font-medium">{formatDateTime(rescuer.created_at)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-muted-foreground">Hoạt động cuối</p>
+                    <p className="text-muted-foreground">{t('lastActive')}</p>
                     <p className="font-medium">{formatRelativeTime(rescuer.last_active_at)}</p>
                   </div>
                 </div>
@@ -409,14 +412,14 @@ export default function RescuerDetailPage() {
 
             {/* Quick Actions */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold text-foreground">Thao tác</h3>
+              <h3 className="mb-4 font-semibold text-foreground">{t('actions')}</h3>
               <div className="space-y-2">
                 <a
                   href={`tel:${rescuer.phone}`}
                   className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 py-2 text-sm font-medium text-white hover:bg-green-600"
                 >
                   <Phone className="h-4 w-4" />
-                  Gọi điện
+                  {t('call')}
                 </a>
                 <button
                   onClick={() =>
@@ -428,7 +431,7 @@ export default function RescuerDetailPage() {
                   className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-500 py-2 text-sm font-medium text-white hover:bg-blue-600"
                 >
                   <Navigation className="h-4 w-4" />
-                  Xem vị trí
+                  {t('viewLocation')}
                 </button>
               </div>
             </div>
@@ -441,9 +444,9 @@ export default function RescuerDetailPage() {
         isOpen={showSuspendDialog}
         onClose={() => setShowSuspendDialog(false)}
         onConfirm={() => updateStatusMutation.mutate('OFFLINE')}
-        title="Tạm ngưng đội cứu hộ"
-        message={`Bạn có chắc muốn tạm ngưng đội cứu hộ "${rescuer.name}"? Họ sẽ không nhận được nhiệm vụ mới cho đến khi được kích hoạt lại.`}
-        confirmText="Tạm ngưng"
+        title={t('suspendDialogTitle')}
+        message={t('suspendDialogMessage', { name: rescuer.name })}
+        confirmText={t('suspend')}
         variant="danger"
         isLoading={updateStatusMutation.isPending}
       />
@@ -453,9 +456,9 @@ export default function RescuerDetailPage() {
         isOpen={showActivateDialog}
         onClose={() => setShowActivateDialog(false)}
         onConfirm={() => updateStatusMutation.mutate('ONLINE')}
-        title="Kích hoạt đội cứu hộ"
-        message={`Bạn có chắc muốn kích hoạt lại đội cứu hộ "${rescuer.name}"? Họ sẽ có thể nhận nhiệm vụ mới.`}
-        confirmText="Kích hoạt"
+        title={t('activateDialogTitle')}
+        message={t('activateDialogMessage', { name: rescuer.name })}
+        confirmText={t('reactivate')}
         variant="success"
         isLoading={updateStatusMutation.isPending}
       />

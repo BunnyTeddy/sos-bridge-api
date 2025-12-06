@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Copy,
   Check,
@@ -114,6 +115,8 @@ export function DepositModal({
   walletAddress = '0x742d35Cc6634C0532925a3b844Bc9e7595f8fE58',
   network = 'Base Sepolia',
 }: DepositModalProps) {
+  const t = useTranslations('modal.deposit');
+  const tc = useTranslations('common');
   const [copied, setCopied] = useState(false);
   const [showQR, setShowQR] = useState(true);
 
@@ -139,8 +142,8 @@ export function DepositModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Nạp tiền vào ngân quỹ"
-      subtitle="Gửi USDC hoặc ETH đến địa chỉ ví dưới đây"
+      title={t('title')}
+      subtitle={t('subtitle')}
       size="md"
     >
       <ModalBody>
@@ -150,9 +153,9 @@ export function DepositModal({
             <div className="flex items-start gap-3">
               <AlertCircle className="mt-0.5 h-5 w-5 text-blue-600" />
               <div>
-                <h4 className="font-medium text-blue-900">Lưu ý quan trọng</h4>
+                <h4 className="font-medium text-blue-900">{t('importantNote')}</h4>
                 <p className="mt-1 text-sm text-blue-700">
-                  Chỉ gửi token trên mạng <strong>{network}</strong>. Gửi sai mạng có thể mất tiền vĩnh viễn.
+                  {t('networkWarning', { network })}
                 </p>
               </div>
             </div>
@@ -165,7 +168,7 @@ export function DepositModal({
                 <QRCodeSVG data={walletAddress} size={180} />
               </div>
               <p className="text-xs text-muted-foreground">
-                Quét mã QR để nạp tiền
+                {t('scanQR')}
               </p>
             </div>
           )}
@@ -174,7 +177,7 @@ export function DepositModal({
           <div>
             <label className="mb-2 flex items-center gap-2 text-sm font-medium">
               <Wallet className="h-4 w-4 text-muted-foreground" />
-              Địa chỉ ví ngân quỹ
+              {t('treasuryAddress')}
             </label>
             <div className="flex items-center gap-2">
               <div className="flex-1 overflow-hidden rounded-lg border bg-muted/50 px-3 py-2.5">
@@ -189,7 +192,7 @@ export function DepositModal({
                     ? 'border-green-500 bg-green-50 text-green-600'
                     : 'border-border bg-card hover:bg-muted'
                 }`}
-                title={copied ? 'Đã sao chép!' : 'Sao chép địa chỉ'}
+                title={copied ? t('copied') : t('copyAddress')}
               >
                 {copied ? (
                   <Check className="h-4 w-4" />
@@ -200,7 +203,7 @@ export function DepositModal({
             </div>
             {copied && (
               <p className="mt-1 text-xs text-green-600">
-                ✓ Đã sao chép địa chỉ vào clipboard
+                ✓ {t('copiedToClipboard')}
               </p>
             )}
           </div>
@@ -208,7 +211,7 @@ export function DepositModal({
           {/* Full Address Display */}
           <div className="rounded-lg border bg-card p-3">
             <p className="mb-1 text-xs font-medium text-muted-foreground">
-              Địa chỉ đầy đủ:
+              {t('fullAddress')}
             </p>
             <p className="break-all font-mono text-xs text-foreground">
               {walletAddress}
@@ -223,7 +226,7 @@ export function DepositModal({
               </div>
               <div>
                 <p className="font-medium">{network}</p>
-                <p className="text-xs text-muted-foreground">Testnet Network</p>
+                <p className="text-xs text-muted-foreground">{t('testnetNetwork')}</p>
               </div>
             </div>
             <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
@@ -233,7 +236,7 @@ export function DepositModal({
 
           {/* Supported Tokens */}
           <div>
-            <p className="mb-2 text-sm font-medium">Token được hỗ trợ:</p>
+            <p className="mb-2 text-sm font-medium">{t('supportedTokens')}</p>
             <div className="flex gap-2">
               <div className="flex items-center gap-2 rounded-full border px-3 py-1.5">
                 <span className="text-sm">💵</span>
@@ -253,14 +256,14 @@ export function DepositModal({
               className="flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-sm hover:bg-muted"
             >
               <span>💧</span>
-              Lấy testnet ETH
+              {t('getTestnetETH')}
             </button>
             <button
               onClick={handleOpenExplorer}
               className="flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-sm hover:bg-muted"
             >
               <ExternalLink className="h-4 w-4" />
-              Xem trên Explorer
+              {t('viewOnExplorer')}
             </button>
           </div>
         </div>
@@ -268,18 +271,18 @@ export function DepositModal({
 
       <ModalFooter>
         <Button variant="outline" onClick={onClose}>
-          Đóng
+          {tc('close')}
         </Button>
         <Button onClick={handleCopy}>
           {copied ? (
             <>
               <Check className="mr-2 h-4 w-4" />
-              Đã sao chép
+              {t('copied')}
             </>
           ) : (
             <>
               <Copy className="mr-2 h-4 w-4" />
-              Sao chép địa chỉ
+              {t('copyAddress')}
             </>
           )}
         </Button>
@@ -287,4 +290,5 @@ export function DepositModal({
     </Modal>
   );
 }
+
 

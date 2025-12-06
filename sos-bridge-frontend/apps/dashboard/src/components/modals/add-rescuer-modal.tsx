@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import {
   User,
   Phone,
@@ -57,6 +58,8 @@ export function AddRescuerModal({
   onClose,
   onSuccess,
 }: AddRescuerModalProps) {
+  const t = useTranslations('modal.addRescuer');
+  const tc = useTranslations('common');
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const queryClient = useQueryClient();
@@ -95,24 +98,24 @@ export function AddRescuerModal({
 
     // Name validation
     if (!formData.name.trim()) {
-      newErrors.name = 'Vui lòng nhập tên đội cứu hộ';
+      newErrors.name = t('teamNameRequired');
     }
 
     // Phone validation (Vietnamese phone format)
     if (!formData.phone) {
-      newErrors.phone = 'Vui lòng nhập số điện thoại';
+      newErrors.phone = t('phoneRequired');
     } else if (!/^(0|\+84)[0-9]{9,10}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+      newErrors.phone = t('phoneInvalid');
     }
 
     // Capacity validation
     if (formData.vehicle_capacity < 1) {
-      newErrors.vehicle_capacity = 'Sức chứa phải lớn hơn 0';
+      newErrors.vehicle_capacity = t('capacityRequired');
     }
 
     // Wallet address validation (optional but if provided, must be valid)
     if (formData.wallet_address && !/^0x[a-fA-F0-9]{40}$/.test(formData.wallet_address)) {
-      newErrors.wallet_address = 'Địa chỉ ví không hợp lệ (phải là địa chỉ Ethereum/Aptos)';
+      newErrors.wallet_address = t('walletAddressInvalid');
     }
 
     setErrors(newErrors);
@@ -155,8 +158,8 @@ export function AddRescuerModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Thêm đội cứu hộ mới"
-      subtitle="Nhập thông tin đội cứu hộ để đăng ký vào hệ thống"
+      title={t('title')}
+      subtitle={t('subtitle')}
       size="lg"
     >
       <ModalBody>
@@ -165,13 +168,13 @@ export function AddRescuerModal({
           <div>
             <label className="mb-1 flex items-center gap-2 text-sm font-medium">
               <User className="h-4 w-4 text-muted-foreground" />
-              Tên đội cứu hộ <span className="text-red-500">*</span>
+              {t('teamName')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              placeholder="VD: Đội cứu hộ Sông Hương"
+              placeholder={t('teamNamePlaceholder')}
               className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
                 errors.name
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
@@ -187,7 +190,7 @@ export function AddRescuerModal({
           <div>
             <label className="mb-1 flex items-center gap-2 text-sm font-medium">
               <Phone className="h-4 w-4 text-muted-foreground" />
-              Số điện thoại <span className="text-red-500">*</span>
+              {t('phone')} <span className="text-red-500">*</span>
             </label>
             <input
               type="tel"
@@ -210,14 +213,14 @@ export function AddRescuerModal({
             <div className="mb-1 flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm font-medium">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
-                Vị trí hiện tại
+                {t('currentLocation')}
               </label>
               <button
                 type="button"
                 onClick={handleUseCurrentLocation}
                 className="text-xs text-primary hover:underline"
               >
-                Dùng vị trí hiện tại
+                {t('useCurrentLocation')}
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -225,19 +228,19 @@ export function AddRescuerModal({
                 type="text"
                 value={formData.lat}
                 onChange={(e) => handleChange('lat', e.target.value)}
-                placeholder="Vĩ độ (VD: 16.0544)"
+                placeholder={t('latPlaceholder')}
                 className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
               <input
                 type="text"
                 value={formData.lng}
                 onChange={(e) => handleChange('lng', e.target.value)}
-                placeholder="Kinh độ (VD: 108.2022)"
+                placeholder={t('lngPlaceholder')}
                 className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Để trống sẽ sử dụng vị trí mặc định (Đà Nẵng)
+              {t('defaultLocationNote')}
             </p>
           </div>
 
@@ -246,7 +249,7 @@ export function AddRescuerModal({
             <div>
               <label className="mb-1 flex items-center gap-2 text-sm font-medium">
                 <Truck className="h-4 w-4 text-muted-foreground" />
-                Loại phương tiện <span className="text-red-500">*</span>
+                {t('vehicleType')} <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.vehicle_type}
@@ -265,7 +268,7 @@ export function AddRescuerModal({
             <div>
               <label className="mb-1 flex items-center gap-2 text-sm font-medium">
                 <Users className="h-4 w-4 text-muted-foreground" />
-                Sức chứa (người) <span className="text-red-500">*</span>
+                {t('capacity')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -291,7 +294,7 @@ export function AddRescuerModal({
           <div>
             <label className="mb-1 flex items-center gap-2 text-sm font-medium">
               <Wallet className="h-4 w-4 text-muted-foreground" />
-              Địa chỉ ví blockchain
+              {t('walletAddress')}
             </label>
             <input
               type="text"
@@ -308,7 +311,7 @@ export function AddRescuerModal({
               <p className="mt-1 text-xs text-red-500">{errors.wallet_address}</p>
             )}
             <p className="mt-1 text-xs text-muted-foreground">
-              Địa chỉ ví để nhận thưởng (tùy chọn)
+              {t('walletAddressNote')}
             </p>
           </div>
 
@@ -316,24 +319,24 @@ export function AddRescuerModal({
           <div>
             <label className="mb-1 flex items-center gap-2 text-sm font-medium">
               <MessageCircle className="h-4 w-4 text-muted-foreground" />
-              Telegram User ID
+              {t('telegramId')}
             </label>
             <input
               type="text"
               value={formData.telegram_user_id}
               onChange={(e) => handleChange('telegram_user_id', e.target.value)}
-              placeholder="VD: 123456789"
+              placeholder={t('telegramIdPlaceholder')}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <p className="mt-1 text-xs text-muted-foreground">
-              ID Telegram để nhận thông báo nhiệm vụ (tùy chọn)
+              {t('telegramIdNote')}
             </p>
           </div>
 
           {/* Error message */}
           {createMutation.isError && (
             <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
-              Có lỗi xảy ra khi thêm đội cứu hộ. Vui lòng thử lại.
+              {t('createError')}
             </div>
           )}
         </div>
@@ -341,13 +344,14 @@ export function AddRescuerModal({
 
       <ModalFooter>
         <Button variant="outline" onClick={handleClose}>
-          Hủy
+          {tc('cancel')}
         </Button>
         <Button onClick={handleSubmit} isLoading={createMutation.isPending}>
-          Thêm đội cứu hộ
+          {t('addButton')}
         </Button>
       </ModalFooter>
     </Modal>
   );
 }
+
 

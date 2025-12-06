@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import {
   MapPin,
@@ -29,6 +30,8 @@ const DEFAULT_LOCATION = {
 };
 
 function SOSFormContent() {
+  const t = useTranslations('sos');
+  const tc = useTranslations('common');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, webApp, isTelegram } = useTelegram();
@@ -108,7 +111,7 @@ function SOSFormContent() {
     
     // Validate phone
     if (!formData.phone || formData.phone.length < 9) {
-      const errorMsg = 'Vui lòng nhập số điện thoại hợp lệ (ít nhất 9 số)';
+      const errorMsg = t('phoneError');
       setError(errorMsg);
       console.log('[Form] Validation failed:', errorMsg);
       return;
@@ -116,14 +119,14 @@ function SOSFormContent() {
 
     // Validate location OR address
     if (!hasValidLocation && !formData.addressText.trim()) {
-      const errorMsg = 'Vui lòng nhập địa chỉ hoặc cho phép truy cập vị trí';
+      const errorMsg = t('locationOrAddressError');
       setError(errorMsg);
       console.log('[Form] Validation failed:', errorMsg);
       return;
     }
 
     if (!hasValidLocation && formData.addressText.trim().length < 5) {
-      const errorMsg = 'Địa chỉ cần ít nhất 5 ký tự';
+      const errorMsg = t('addressTooShort');
       setError(errorMsg);
       console.log('[Form] Validation failed:', errorMsg);
       return;
@@ -215,21 +218,21 @@ function SOSFormContent() {
 
   // Main button setup
   useEffect(() => {
-    mainButton.show('Gửi yêu cầu cứu hộ', handleSubmit);
+    mainButton.show(t('submitButton'), handleSubmit);
     if (isSubmitting) {
       mainButton.setLoading(true);
     } else {
       mainButton.setLoading(false);
     }
     return () => mainButton.hide();
-  }, [formData, isSubmitting, hasValidLocation, useManualAddress]);
+  }, [formData, isSubmitting, hasValidLocation, useManualAddress, t]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-red-50 to-white safe-top">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-red-50/90 px-4 py-3 backdrop-blur-sm">
-        <h1 className="text-xl font-bold text-gray-900">Gửi yêu cầu cứu hộ</h1>
-        <p className="text-sm text-gray-500">Điền thông tin để đội cứu hộ tìm đến bạn</p>
+        <h1 className="text-xl font-bold text-gray-900">{t('formTitle')}</h1>
+        <p className="text-sm text-gray-500">{t('formSubtitle')}</p>
       </header>
 
       <main className="px-4 pb-32 pt-4">
@@ -244,11 +247,11 @@ function SOSFormContent() {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
                 <MapPin className="h-4 w-4 text-red-600" />
               </div>
-              <span className="font-semibold text-gray-800">Vị trí *</span>
+              <span className="font-semibold text-gray-800">{t('locationRequired')}</span>
               {locationLoading && (
                 <span className="ml-auto text-xs text-gray-400 flex items-center gap-1">
                   <RefreshCw className="h-3 w-3 animate-spin" />
-                  Đang định vị...
+                  {tc('loading')}
                 </span>
               )}
             </div>
@@ -258,11 +261,11 @@ function SOSFormContent() {
                 {/* Address input FIRST - most important */}
                 <div className="rounded-xl border-2 border-red-200 bg-red-50 p-3">
                   <label className="block text-xs font-semibold text-red-700 mb-2">
-                    📍 Nhập địa chỉ chi tiết để đội cứu hộ tìm nhanh hơn:
+                    📍 {t('enterDetailedAddress')}
                   </label>
                 <input
                   type="text"
-                    placeholder="VD: Số 5, xóm Bàu, thôn 3, xã Hải Thượng..."
+                    placeholder={t('addressPlaceholder')}
                   value={formData.addressText}
                   onChange={(e) => setFormData({ ...formData, addressText: e.target.value })}
                     className="w-full rounded-lg border-2 border-red-300 bg-white px-3 py-3 text-sm font-medium focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
@@ -276,7 +279,7 @@ function SOSFormContent() {
                 
                 {/* GPS confirmation - compact */}
                 <p className="text-center text-xs text-green-600">
-                  ✓ GPS: {currentLat?.toFixed(4)}, {currentLng?.toFixed(4)}
+                  ✓ {t('gpsConfirmed')}: {currentLat?.toFixed(4)}, {currentLng?.toFixed(4)}
                 </p>
               </div>
             ) : (
@@ -286,7 +289,7 @@ function SOSFormContent() {
                   <div className="flex items-start gap-2 mb-2">
                     <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-amber-700">
-                      {locationError || 'Không có GPS - Vui lòng nhập địa chỉ chi tiết'}
+                      {locationError || t('manualAddressWarning')}
                     </p>
                   </div>
                   
@@ -297,7 +300,7 @@ function SOSFormContent() {
                       className="flex items-center gap-1 rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-200 disabled:opacity-50"
                 >
                       <RefreshCw className={`h-3 w-3 ${locationLoading ? 'animate-spin' : ''}`} />
-                      Thử lại GPS
+                      {t('retryGPS')}
                     </button>
                     
                     <button
@@ -305,7 +308,7 @@ function SOSFormContent() {
                       className="flex items-center gap-1 rounded-lg bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200"
                     >
                       <Navigation className="h-3 w-3" />
-                      Dùng vị trí mặc định
+                      {tc('back')}
                 </button>
                   </div>
                 </div>
@@ -313,10 +316,10 @@ function SOSFormContent() {
                 {/* Address Input - Required when no GPS */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nhập địa chỉ chi tiết *
+                    {t('addressRequired')}
                   </label>
                   <textarea
-                    placeholder="Ví dụ: Xóm Bàu, thôn 5, xã Hải Thượng, huyện Hải Lăng, Quảng Trị"
+                    placeholder={t('addressExample')}
                     value={formData.addressText}
                     onChange={(e) => setFormData({ ...formData, addressText: e.target.value })}
                     rows={3}
@@ -328,8 +331,8 @@ function SOSFormContent() {
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     {formData.addressText.length >= 5 
-                      ? '✓ Địa chỉ hợp lệ' 
-                      : `Cần ít nhất 5 ký tự (${formData.addressText.length}/5)`
+                      ? `✓ ${t('addressValid')}` 
+                      : `${t('addressMinChars')} (${formData.addressText.length}/5)`
                     }
                   </p>
                 </div>
@@ -350,11 +353,11 @@ function SOSFormContent() {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
                 <Phone className="h-4 w-4 text-blue-600" />
               </div>
-              <span className="font-semibold text-gray-800">Số điện thoại *</span>
+              <span className="font-semibold text-gray-800">{t('phone')}</span>
             </div>
             <input
               type="tel"
-              placeholder="0912 345 678"
+              placeholder={t('phonePlaceholder')}
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className="w-full rounded-lg border border-gray-200 px-4 py-3 text-lg focus:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-100"
@@ -375,7 +378,7 @@ function SOSFormContent() {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
                 <Users className="h-4 w-4 text-green-600" />
               </div>
-              <span className="font-semibold text-gray-800">Số người cần cứu</span>
+              <span className="font-semibold text-gray-800">{t('peopleCount')}</span>
             </div>
             <div className="flex items-center justify-center gap-4">
               <button
@@ -406,7 +409,7 @@ function SOSFormContent() {
         >
           <div className="rounded-2xl bg-white p-4 shadow-sm">
             <p className="mb-3 text-sm font-medium text-gray-600">
-              Có người đặc biệt cần ưu tiên?
+              {t('specialNeeds')}
             </p>
             <div className="flex flex-wrap gap-2">
               <button
@@ -418,7 +421,7 @@ function SOSFormContent() {
                 }`}
               >
                 <PersonStanding className="h-4 w-4" />
-                Người già
+                {t('elderly')}
               </button>
               <button
                 onClick={() => setFormData({ ...formData, hasChildren: !formData.hasChildren })}
@@ -429,7 +432,7 @@ function SOSFormContent() {
                 }`}
               >
                 <Baby className="h-4 w-4" />
-                Trẻ em
+                {t('children')}
               </button>
               <button
                 onClick={() => setFormData({ ...formData, hasDisabled: !formData.hasDisabled })}
@@ -440,7 +443,7 @@ function SOSFormContent() {
                 }`}
               >
                 <Accessibility className="h-4 w-4" />
-                Người khuyết tật
+                {t('disabled')}
               </button>
             </div>
           </div>
@@ -458,10 +461,10 @@ function SOSFormContent() {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100">
                 <MessageSquare className="h-4 w-4 text-yellow-600" />
               </div>
-              <span className="font-semibold text-gray-800">Ghi chú thêm</span>
+              <span className="font-semibold text-gray-800">{t('notes')}</span>
             </div>
             <textarea
-              placeholder="Mô tả thêm tình trạng (mực nước, sức khỏe...)"
+              placeholder={t('notesPlaceholder')}
               value={formData.note}
               onChange={(e) => setFormData({ ...formData, note: e.target.value })}
               rows={3}
@@ -478,7 +481,7 @@ function SOSFormContent() {
             className="mb-4 rounded-2xl bg-red-50 p-4"
           >
             <p className="text-center text-sm font-medium text-red-700">
-              ⚡ Yêu cầu của bạn sẽ được <strong>ưu tiên cao</strong> do có người cần hỗ trợ đặc biệt
+              ⚡ {t('priorityHigh')}
             </p>
           </motion.div>
         )}
@@ -490,10 +493,10 @@ function SOSFormContent() {
             animate={{ opacity: 1 }}
             className="mb-4 rounded-xl bg-red-100 p-3"
           >
-            <p className="text-center text-sm font-bold text-red-800 mb-1">Lỗi:</p>
+            <p className="text-center text-sm font-bold text-red-800 mb-1">{tc('error')}:</p>
             <p className="text-center text-sm text-red-700">{error}</p>
             <details className="mt-2 text-left">
-              <summary className="text-xs text-red-600 cursor-pointer">Chi tiết debug</summary>
+              <summary className="text-xs text-red-600 cursor-pointer">Debug</summary>
               <pre className="mt-1 text-xs bg-red-200 p-2 rounded overflow-auto max-h-32">
                 {JSON.stringify({
                   isTelegram,
@@ -516,15 +519,15 @@ function SOSFormContent() {
             isLoading={isSubmitting}
             disabled={!canSubmit || isSubmitting}
           >
-            {isSubmitting ? 'Đang gửi...' : 'Gửi yêu cầu cứu hộ'}
+            {isSubmitting ? t('submitting') : t('submitButton')}
           </Button>
           
           {!canSubmit && (
             <p className="text-center text-xs text-gray-500">
               {formData.phone.length < 9 
-                ? 'Vui lòng nhập số điện thoại' 
+                ? t('enterPhone') 
                 : !hasValidLocation && formData.addressText.length < 5
-                  ? 'Vui lòng nhập địa chỉ chi tiết'
+                  ? t('enterDetailedAddressShort')
                   : ''
               }
             </p>
@@ -535,9 +538,13 @@ function SOSFormContent() {
   );
 }
 
+function LoadingFallback() {
+  return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
+}
+
 export default function SOSFormPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Đang tải...</div>}>
+    <Suspense fallback={<LoadingFallback />}>
       <SOSFormContent />
     </Suspense>
   );

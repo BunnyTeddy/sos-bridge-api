@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import { Modal, ModalBody, ModalFooter } from './modal';
 import { Button, StatusBadge } from '@sos-bridge/ui';
@@ -27,23 +28,20 @@ const statusFlow: Record<TicketStatus, TicketStatus[]> = {
   CANCELLED: ['OPEN'], // Can reopen
 };
 
-const statusDescriptions: Record<TicketStatus, string> = {
-  OPEN: 'Yêu cầu mới, đang chờ gán đội cứu hộ',
-  ASSIGNED: 'Đã gán đội cứu hộ, chờ xác nhận nhận nhiệm vụ',
-  IN_PROGRESS: 'Đội cứu hộ đang trên đường hoặc đang cứu hộ',
-  VERIFIED: 'Nhiệm vụ đã hoàn thành, chờ xác thực ảnh',
-  COMPLETED: 'Nhiệm vụ hoàn thành, đã thanh toán',
-  CANCELLED: 'Yêu cầu đã bị hủy',
-};
-
 export function UpdateStatusModal({
   isOpen,
   onClose,
   ticket,
   onSuccess,
 }: UpdateStatusModalProps) {
+  const t = useTranslations('modal.updateStatus');
+  const tc = useTranslations('common');
   const [selectedStatus, setSelectedStatus] = useState<TicketStatus | null>(null);
   const queryClient = useQueryClient();
+
+  const getStatusDescription = (status: TicketStatus): string => {
+    return t(`statusDescriptions.${status}`);
+  };
 
   // Available statuses for current ticket
   const availableStatuses = statusFlow[ticket.status] || [];
@@ -79,18 +77,18 @@ export function UpdateStatusModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Cập nhật trạng thái"
-      subtitle={`Yêu cầu #${ticket.ticket_id.slice(-6)}`}
+      title={t('title')}
+      subtitle={t('subtitle', { id: ticket.ticket_id.slice(-6) })}
       size="md"
     >
       <ModalBody>
         {/* Current status */}
         <div className="mb-4 rounded-lg bg-muted p-3">
-          <p className="mb-1 text-xs text-muted-foreground">Trạng thái hiện tại</p>
+          <p className="mb-1 text-xs text-muted-foreground">{t('currentStatus')}</p>
           <div className="flex items-center gap-2">
             <StatusBadge status={ticket.status} />
             <span className="text-sm text-muted-foreground">
-              {statusDescriptions[ticket.status]}
+              {getStatusDescription(ticket.status)}
             </span>
           </div>
         </div>
@@ -99,12 +97,12 @@ export function UpdateStatusModal({
         {availableStatuses.length === 0 ? (
           <div className="py-8 text-center text-muted-foreground">
             <CheckCircle className="mx-auto mb-2 h-12 w-12 text-green-500" />
-            <p>Yêu cầu này đã ở trạng thái cuối cùng</p>
-            <p className="text-sm">Không thể thay đổi trạng thái</p>
+            <p>{t('finalState')}</p>
+            <p className="text-sm">{t('cannotChange')}</p>
           </div>
         ) : (
           <div className="space-y-2">
-            <p className="mb-2 text-sm font-medium">Chọn trạng thái mới:</p>
+            <p className="mb-2 text-sm font-medium">{t('selectNewStatus')}</p>
             {availableStatuses.map((status) => (
               <StatusOption
                 key={status}
@@ -112,6 +110,7 @@ export function UpdateStatusModal({
                 currentStatus={ticket.status}
                 isSelected={selectedStatus === status}
                 onSelect={() => setSelectedStatus(status)}
+                description={getStatusDescription(status)}
               />
             ))}
           </div>
@@ -120,21 +119,21 @@ export function UpdateStatusModal({
         {/* Warning for cancel */}
         {selectedStatus === 'CANCELLED' && (
           <div className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-            <strong>Cảnh báo:</strong> Hủy yêu cầu sẽ không thể hoàn tác. Nếu đã gán đội cứu hộ, họ sẽ được thông báo về việc hủy này.
+            {t('cancelWarning')}
           </div>
         )}
 
         {/* Error message */}
         {updateMutation.isError && (
           <div className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-            Có lỗi xảy ra khi cập nhật trạng thái. Vui lòng thử lại.
+            {t('updateError')}
           </div>
         )}
       </ModalBody>
 
       <ModalFooter>
         <Button variant="outline" onClick={handleClose}>
-          Hủy
+          {tc('cancel')}
         </Button>
         <Button
           onClick={handleUpdate}
@@ -142,7 +141,7 @@ export function UpdateStatusModal({
           isLoading={updateMutation.isPending}
           variant={selectedStatus === 'CANCELLED' ? 'destructive' : 'default'}
         >
-          Cập nhật trạng thái
+          {t('updateButton')}
         </Button>
       </ModalFooter>
     </Modal>
@@ -154,9 +153,10 @@ interface StatusOptionProps {
   currentStatus: TicketStatus;
   isSelected: boolean;
   onSelect: () => void;
+  description: string;
 }
 
-function StatusOption({ status, currentStatus, isSelected, onSelect }: StatusOptionProps) {
+function StatusOption({ status, currentStatus, isSelected, onSelect, description }: StatusOptionProps) {
   const isCancel = status === 'CANCELLED';
 
   return (
@@ -184,9 +184,10 @@ function StatusOption({ status, currentStatus, isSelected, onSelect }: StatusOpt
         )}
       </div>
       <p className="mt-2 text-sm text-muted-foreground">
-        {statusDescriptions[status]}
+        {description}
       </p>
     </div>
   );
 }
+
 

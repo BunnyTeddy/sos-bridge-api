@@ -1,6 +1,7 @@
 'use client';
 
 import { type LucideIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@sos-bridge/ui';
 
 interface StatsCardProps {
@@ -25,6 +26,8 @@ export function StatsCard({
   iconColor = 'text-primary',
   iconBg = 'bg-primary/10',
 }: StatsCardProps) {
+  const t = useTranslations('statsCard');
+  
   return (
     <div className="rounded-xl border bg-card p-6 shadow-sm">
       <div className="flex items-start justify-between">
@@ -42,7 +45,7 @@ export function StatsCard({
               )}
             >
               {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%{' '}
-              <span className="text-muted-foreground">so với tuần trước</span>
+              <span className="text-muted-foreground">{t('comparedToLastWeek')}</span>
             </p>
           )}
         </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Plus, Send, UserPlus, AlertCircle, Map, Ticket } from 'lucide-react';
 import { CreateTicketModal } from '@/components/modals/create-ticket-modal';
 import { ConfirmDialog } from '@/components/modals/confirm-dialog';
@@ -14,28 +15,29 @@ interface QuickAction {
 }
 
 export function QuickActions() {
+  const t = useTranslations('quickActions');
   const router = useRouter();
   const [showCreateTicketModal, setShowCreateTicketModal] = useState(false);
   const [showBroadcastDialog, setShowBroadcastDialog] = useState(false);
 
   const actions: QuickAction[] = [
     {
-      label: 'Tạo yêu cầu',
+      label: t('newRequest'),
       icon: Plus,
       onClick: () => setShowCreateTicketModal(true),
     },
     {
-      label: 'Xem bản đồ',
+      label: t('viewMap'),
       icon: Map,
       onClick: () => router.push('/map'),
     },
     {
-      label: 'Đội cứu hộ',
+      label: t('rescueTeams'),
       icon: UserPlus,
       onClick: () => router.push('/rescuers'),
     },
     {
-      label: 'Phát cảnh báo',
+      label: t('broadcastAlert'),
       icon: AlertCircle,
       onClick: () => setShowBroadcastDialog(true),
       variant: 'destructive',
@@ -53,7 +55,7 @@ export function QuickActions() {
   return (
     <>
       <div className="rounded-xl border bg-card p-4">
-        <h3 className="mb-4 font-semibold text-foreground">Thao tác nhanh</h3>
+        <h3 className="mb-4 font-semibold text-foreground">{t('title')}</h3>
         <div className="grid grid-cols-2 gap-2">
           {actions.map((action) => (
             <button
@@ -88,9 +90,9 @@ export function QuickActions() {
         isOpen={showBroadcastDialog}
         onClose={() => setShowBroadcastDialog(false)}
         onConfirm={handleBroadcastAlert}
-        title="Phát cảnh báo khẩn cấp"
-        message="Bạn có chắc muốn phát cảnh báo khẩn cấp đến tất cả đội cứu hộ? Tính năng này chỉ nên dùng trong trường hợp khẩn cấp thực sự."
-        confirmText="Phát cảnh báo"
+        title={t('broadcastDialogTitle')}
+        message={t('broadcastDialogMessage')}
+        confirmText={t('broadcastAlert')}
         variant="danger"
       />
     </>

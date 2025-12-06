@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import {
   BarChart3,
   TrendingUp,
@@ -69,6 +70,8 @@ const responseTimeData = [
 ];
 
 export default function AnalyticsPage() {
+  const t = useTranslations('analytics');
+  const tCommon = useTranslations('common');
   const [dateRange, setDateRange] = useState('7d');
 
   // Fetch stats
@@ -110,8 +113,8 @@ export default function AnalyticsPage() {
 
   return (
     <DashboardLayout
-      title="Phân tích & Báo cáo"
-      subtitle="Thống kê hiệu suất hệ thống"
+      title={t('title')}
+      subtitle={t('subtitle')}
       onRefresh={() => refetch()}
     >
       {isLoading ? (
@@ -129,10 +132,10 @@ export default function AnalyticsPage() {
                 onChange={(e) => setDateRange(e.target.value)}
                 className="border-none bg-transparent text-sm focus:outline-none"
               >
-                <option value="7d">7 ngày qua</option>
-                <option value="30d">30 ngày qua</option>
-                <option value="90d">90 ngày qua</option>
-                <option value="all">Tất cả</option>
+                <option value="7d">{t('last7Days')}</option>
+                <option value="30d">{t('last30Days')}</option>
+                <option value="90d">{t('last90Days')}</option>
+                <option value="all">{tCommon('all')}</option>
               </select>
             </div>
 
@@ -141,43 +144,43 @@ export default function AnalyticsPage() {
               className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm hover:bg-muted"
             >
               <Download className="h-4 w-4" />
-              Xuất báo cáo
+              {t('exportReport')}
             </button>
           </div>
 
           {/* Summary Stats */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatsCard
-              title="Tổng yêu cầu"
+              title={t('totalRequests')}
               value={stats?.tickets.total || 0}
-              subtitle="Trong khoảng thời gian"
+              subtitle={t('inTimeRange')}
               icon={Ticket}
               iconColor="text-blue-600"
               iconBg="bg-blue-100"
               trend={{ value: 15, isPositive: true }}
             />
             <StatsCard
-              title="Tỷ lệ hoàn thành"
+              title={t('completionRate')}
               value={`${stats?.tickets.total ? Math.round((stats.tickets.completed / stats.tickets.total) * 100) : 0}%`}
-              subtitle="Nhiệm vụ thành công"
+              subtitle={t('successfulMissions')}
               icon={TrendingUp}
               iconColor="text-green-600"
               iconBg="bg-green-100"
               trend={{ value: 5, isPositive: true }}
             />
             <StatsCard
-              title="Thời gian phản hồi TB"
-              value="12 phút"
-              subtitle="Từ tạo đến gán"
+              title={t('avgResponseTime')}
+              value={t('minutes', { count: 12 })}
+              subtitle={t('fromCreateToAssign')}
               icon={Clock}
               iconColor="text-yellow-600"
               iconBg="bg-yellow-100"
               trend={{ value: 8, isPositive: true }}
             />
             <StatsCard
-              title="Tổng giải ngân"
+              title={t('totalDisbursed')}
               value={`${stats?.transactions.total_disbursed_usdc || 0} USDC`}
-              subtitle={`${stats?.transactions.confirmed || 0} giao dịch`}
+              subtitle={t('transactionsCount', { count: stats?.transactions.confirmed || 0 })}
               icon={DollarSign}
               iconColor="text-purple-600"
               iconBg="bg-purple-100"
@@ -188,7 +191,7 @@ export default function AnalyticsPage() {
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Tickets Over Time */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold">Yêu cầu theo ngày</h3>
+              <h3 className="mb-4 font-semibold">{t('requestsByDay')}</h3>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={ticketsByDay}>
@@ -218,7 +221,7 @@ export default function AnalyticsPage() {
 
             {/* Status Distribution */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold">Phân bố trạng thái</h3>
+              <h3 className="mb-4 font-semibold">{t('statusDistribution')}</h3>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -250,7 +253,7 @@ export default function AnalyticsPage() {
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Response Time Distribution */}
             <div className="rounded-xl border bg-card p-6">
-              <h3 className="mb-4 font-semibold">Thời gian phản hồi</h3>
+              <h3 className="mb-4 font-semibold">{t('responseTime')}</h3>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={responseTimeData}>
@@ -267,12 +270,12 @@ export default function AnalyticsPage() {
             {/* Top Rescuers */}
             <div className="rounded-xl border bg-card p-6">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-semibold">Top đội cứu hộ</h3>
+                <h3 className="font-semibold">{t('topRescuers')}</h3>
                 <button
                   onClick={() => exportRescuersToCSV(rescuers, `rescuers-${new Date().toISOString().split('T')[0]}`)}
                   className="text-xs text-primary hover:underline"
                 >
-                  Xuất danh sách
+                  {t('exportList')}
                 </button>
               </div>
               <div className="space-y-4">
@@ -307,7 +310,7 @@ export default function AnalyticsPage() {
                       <p className="font-bold text-foreground">
                         {'completed_missions' in rescuer ? rescuer.completed_missions : rescuer.missions}
                       </p>
-                      <p className="text-xs text-muted-foreground">nhiệm vụ</p>
+                      <p className="text-xs text-muted-foreground">{tCommon('missions')}</p>
                     </div>
                   </div>
                 ))}
@@ -323,9 +326,9 @@ export default function AnalyticsPage() {
                   <TrendingUp className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-green-700">Hiệu suất tốt</p>
+                  <p className="text-sm text-green-700">{t('goodPerformance')}</p>
                   <p className="text-2xl font-bold text-green-800">
-                    92% yêu cầu được xử lý trong 30 phút
+                    {t('processedIn30Min')}
                   </p>
                 </div>
               </div>
@@ -337,9 +340,9 @@ export default function AnalyticsPage() {
                   <Users className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-blue-700">Đội ngũ hoạt động</p>
+                  <p className="text-sm text-blue-700">{t('activeTeam')}</p>
                   <p className="text-2xl font-bold text-blue-800">
-                    {stats?.rescuers.online || 0} đội online trung bình
+                    {t('avgOnlineTeams', { count: stats?.rescuers.online || 0 })}
                   </p>
                 </div>
               </div>
@@ -351,9 +354,9 @@ export default function AnalyticsPage() {
                   <DollarSign className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-purple-700">Giải ngân hiệu quả</p>
+                  <p className="text-sm text-purple-700">{t('efficientDisbursement')}</p>
                   <p className="text-2xl font-bold text-purple-800">
-                    100% giao dịch thành công
+                    {t('transactionSuccess')}
                   </p>
                 </div>
               </div>

@@ -4,6 +4,7 @@ import { Bell, Search, RefreshCw, AlertTriangle, CheckCircle, Ticket, User, X } 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { apiClient, queryKeys } from '@sos-bridge/api-client';
 import { formatRelativeTime } from '@sos-bridge/ui';
 
@@ -24,6 +25,7 @@ interface Notification {
 }
 
 export function Header({ title, subtitle, onRefresh }: HeaderProps) {
+  const t = useTranslations('header');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -51,13 +53,13 @@ export function Header({ title, subtitle, onRefresh }: HeaderProps) {
 
   // Add notifications for recent open tickets
   recentTickets
-    .filter((t) => t.status === 'OPEN')
+    .filter((tk) => tk.status === 'OPEN')
     .slice(0, 3)
     .forEach((ticket) => {
       notifications.push({
         id: `ticket-${ticket.ticket_id}`,
         type: 'ticket_new',
-        title: 'Yêu cầu mới',
+        title: t('newRequest'),
         message: `#${ticket.ticket_id.slice(-6)} - ${ticket.location.address_text.slice(0, 30)}...`,
         time: ticket.created_at,
         read: false,
@@ -67,14 +69,14 @@ export function Header({ title, subtitle, onRefresh }: HeaderProps) {
 
   // Add notification for completed tickets
   recentTickets
-    .filter((t) => t.status === 'COMPLETED')
+    .filter((tk) => tk.status === 'COMPLETED')
     .slice(0, 2)
     .forEach((ticket) => {
       notifications.push({
         id: `completed-${ticket.ticket_id}`,
         type: 'ticket_completed',
-        title: 'Nhiệm vụ hoàn thành',
-        message: `#${ticket.ticket_id.slice(-6)} đã hoàn thành`,
+        title: t('missionComplete'),
+        message: t('missionCompleteMessage', { id: ticket.ticket_id.slice(-6) }),
         time: ticket.completed_at || ticket.updated_at,
         read: true,
         link: `/tickets/${ticket.ticket_id}`,
@@ -141,7 +143,7 @@ export function Header({ title, subtitle, onRefresh }: HeaderProps) {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Tìm theo mã, SĐT..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus
@@ -202,10 +204,10 @@ export function Header({ title, subtitle, onRefresh }: HeaderProps) {
               />
               <div className="absolute right-0 top-12 z-20 w-80 rounded-xl border bg-card shadow-xl">
                 <div className="flex items-center justify-between border-b px-4 py-3">
-                  <h3 className="font-semibold">Thông báo</h3>
+                  <h3 className="font-semibold">{t('notifications')}</h3>
                   {unreadCount > 0 && (
                     <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700">
-                      {unreadCount} mới
+                      {t('newCount', { count: unreadCount })}
                     </span>
                   )}
                 </div>
@@ -213,7 +215,7 @@ export function Header({ title, subtitle, onRefresh }: HeaderProps) {
                   {notifications.length === 0 ? (
                     <div className="py-8 text-center text-muted-foreground">
                       <Bell className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                      <p className="text-sm">Không có thông báo mới</p>
+                      <p className="text-sm">{t('noNotifications')}</p>
                     </div>
                   ) : (
                     <div className="divide-y">
@@ -255,7 +257,7 @@ export function Header({ title, subtitle, onRefresh }: HeaderProps) {
                     }}
                     className="w-full rounded-lg py-2 text-center text-sm text-primary hover:bg-muted"
                   >
-                    Xem tất cả yêu cầu
+                    {t('viewAllRequests')}
                   </button>
                 </div>
               </div>

@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import {
   User,
   Phone,
@@ -32,6 +33,8 @@ export function AssignRescuerModal({
   ticket,
   onSuccess,
 }: AssignRescuerModalProps) {
+  const t = useTranslations('modal.assignRescuer');
+  const tc = useTranslations('common');
   const [selectedRescuerId, setSelectedRescuerId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const queryClient = useQueryClient();
@@ -101,8 +104,8 @@ export function AssignRescuerModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Gán đội cứu hộ"
-      subtitle={`Yêu cầu #${ticket.ticket_id.slice(-6)} - ${ticket.location.address_text}`}
+      title={t('title')}
+      subtitle={t('subtitle', { id: ticket.ticket_id.slice(-6), address: ticket.location.address_text })}
       size="lg"
     >
       <ModalBody>
@@ -111,7 +114,7 @@ export function AssignRescuerModal({
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Tìm theo tên, SĐT, loại xe..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-lg border bg-background py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
@@ -126,8 +129,8 @@ export function AssignRescuerModal({
         ) : rescuersWithDistance.length === 0 ? (
           <div className="py-12 text-center text-muted-foreground">
             <User className="mx-auto mb-2 h-12 w-12 opacity-50" />
-            <p>Không có đội cứu hộ nào khả dụng</p>
-            <p className="text-sm">Vui lòng thử lại sau</p>
+            <p>{t('noTeamsAvailable')}</p>
+            <p className="text-sm">{t('tryAgainLater')}</p>
           </div>
         ) : (
           <div className="max-h-[400px] space-y-2 overflow-y-auto">
@@ -138,6 +141,7 @@ export function AssignRescuerModal({
                 distance={rescuer.distance}
                 isSelected={selectedRescuerId === rescuer.rescuer_id}
                 onSelect={() => setSelectedRescuerId(rescuer.rescuer_id)}
+                missionLabel={t('missions')}
               />
             ))}
           </div>
@@ -146,21 +150,21 @@ export function AssignRescuerModal({
         {/* Info text */}
         {availableRescuers.length > 0 && (
           <p className="mt-3 text-xs text-muted-foreground">
-            Hiển thị {rescuersWithDistance.length}/{availableRescuers.length} đội cứu hộ khả dụng, sắp xếp theo khoảng cách
+            {t('showingTeams', { shown: rescuersWithDistance.length, total: availableRescuers.length })}
           </p>
         )}
       </ModalBody>
 
       <ModalFooter>
         <Button variant="outline" onClick={handleClose}>
-          Hủy
+          {tc('cancel')}
         </Button>
         <Button
           onClick={handleAssign}
           disabled={!selectedRescuerId}
           isLoading={assignMutation.isPending}
         >
-          Gán đội cứu hộ
+          {t('assignButton')}
         </Button>
       </ModalFooter>
     </Modal>
@@ -172,9 +176,10 @@ interface RescuerItemProps {
   distance: number;
   isSelected: boolean;
   onSelect: () => void;
+  missionLabel: string;
 }
 
-function RescuerItem({ rescuer, distance, isSelected, onSelect }: RescuerItemProps) {
+function RescuerItem({ rescuer, distance, isSelected, onSelect, missionLabel }: RescuerItemProps) {
   const isOnline = rescuer.status === 'ONLINE' || rescuer.status === 'IDLE';
 
   return (
@@ -211,7 +216,7 @@ function RescuerItem({ rescuer, distance, isSelected, onSelect }: RescuerItemPro
               <Star className="h-3 w-3 text-yellow-500" />
               {rescuer.rating.toFixed(1)}
             </span>
-            <span>{rescuer.completed_missions} nhiệm vụ</span>
+            <span>{rescuer.completed_missions} {missionLabel}</span>
           </div>
         </div>
 

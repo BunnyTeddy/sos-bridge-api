@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import {
   Phone,
   MapPin,
@@ -60,6 +61,8 @@ export function CreateTicketModal({
   onClose,
   onSuccess,
 }: CreateTicketModalProps) {
+  const t = useTranslations('modal.createTicket');
+  const tc = useTranslations('common');
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const queryClient = useQueryClient();
@@ -97,28 +100,28 @@ export function CreateTicketModal({
 
     // Phone validation (Vietnamese phone format)
     if (!formData.phone) {
-      newErrors.phone = 'Vui lòng nhập số điện thoại';
+      newErrors.phone = t('phoneRequired');
     } else if (!/^(0|\+84)[0-9]{9,10}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+      newErrors.phone = t('phoneInvalid');
     }
 
     // Location validation
     if (!formData.lat || !formData.lng) {
-      newErrors.lat = 'Vui lòng nhập tọa độ';
+      newErrors.lat = t('locationRequired');
     } else {
       const lat = parseFloat(formData.lat);
       const lng = parseFloat(formData.lng);
       if (isNaN(lat) || lat < -90 || lat > 90) {
-        newErrors.lat = 'Vĩ độ không hợp lệ';
+        newErrors.lat = t('latInvalid');
       }
       if (isNaN(lng) || lng < -180 || lng > 180) {
-        newErrors.lng = 'Kinh độ không hợp lệ';
+        newErrors.lng = t('lngInvalid');
       }
     }
 
     // People count validation
     if (formData.people_count < 1) {
-      newErrors.people_count = 'Số người phải lớn hơn 0';
+      newErrors.people_count = t('peopleCountRequired');
     }
 
     setErrors(newErrors);
@@ -161,8 +164,8 @@ export function CreateTicketModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Tạo yêu cầu cứu hộ mới"
-      subtitle="Nhập thông tin chi tiết về yêu cầu cứu hộ"
+      title={t('title')}
+      subtitle={t('subtitle')}
       size="lg"
     >
       <ModalBody>
@@ -171,13 +174,13 @@ export function CreateTicketModal({
           <div>
             <label className="mb-1 flex items-center gap-2 text-sm font-medium">
               <Phone className="h-4 w-4 text-muted-foreground" />
-              Số điện thoại <span className="text-red-500">*</span>
+              {t('phone')} <span className="text-red-500">*</span>
             </label>
             <input
               type="tel"
               value={formData.phone}
               onChange={(e) => handleChange('phone', e.target.value)}
-              placeholder="0901234567"
+              placeholder={t('phonePlaceholder')}
               className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
                 errors.phone
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
@@ -194,14 +197,14 @@ export function CreateTicketModal({
             <div className="mb-1 flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm font-medium">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
-                Vị trí <span className="text-red-500">*</span>
+                {t('location')} <span className="text-red-500">*</span>
               </label>
               <button
                 type="button"
                 onClick={handleUseCurrentLocation}
                 className="text-xs text-primary hover:underline"
               >
-                Dùng vị trí hiện tại
+                {t('useCurrentLocation')}
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -210,7 +213,7 @@ export function CreateTicketModal({
                   type="text"
                   value={formData.lat}
                   onChange={(e) => handleChange('lat', e.target.value)}
-                  placeholder="Vĩ độ (VD: 16.4637)"
+                  placeholder={t('latPlaceholder')}
                   className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
                     errors.lat
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
@@ -226,7 +229,7 @@ export function CreateTicketModal({
                   type="text"
                   value={formData.lng}
                   onChange={(e) => handleChange('lng', e.target.value)}
-                  placeholder="Kinh độ (VD: 107.5909)"
+                  placeholder={t('lngPlaceholder')}
                   className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
                     errors.lng
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
@@ -241,13 +244,13 @@ export function CreateTicketModal({
           <div>
             <label className="mb-1 flex items-center gap-2 text-sm font-medium">
               <MapPin className="h-4 w-4 text-muted-foreground" />
-              Địa chỉ chi tiết
+              {t('addressDetail')}
             </label>
             <input
               type="text"
               value={formData.address_text}
               onChange={(e) => handleChange('address_text', e.target.value)}
-              placeholder="Số nhà, đường, phường/xã, quận/huyện..."
+              placeholder={t('addressPlaceholder')}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
@@ -257,7 +260,7 @@ export function CreateTicketModal({
             <div>
               <label className="mb-1 flex items-center gap-2 text-sm font-medium">
                 <Users className="h-4 w-4 text-muted-foreground" />
-                Số người cần cứu <span className="text-red-500">*</span>
+                {t('peopleCount')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -270,7 +273,7 @@ export function CreateTicketModal({
             <div>
               <label className="mb-1 flex items-center gap-2 text-sm font-medium">
                 <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                Mức độ ưu tiên
+                {t('priority')}
               </label>
               <select
                 value={formData.priority}
@@ -290,7 +293,7 @@ export function CreateTicketModal({
           <div>
             <label className="mb-2 flex items-center gap-2 text-sm font-medium">
               <User className="h-4 w-4 text-muted-foreground" />
-              Đối tượng đặc biệt
+              {t('specialNeeds')}
             </label>
             <div className="flex flex-wrap gap-4">
               <label className="flex items-center gap-2 text-sm">
@@ -300,7 +303,7 @@ export function CreateTicketModal({
                   onChange={(e) => handleChange('has_elderly', e.target.checked)}
                   className="rounded border-gray-300"
                 />
-                <span>👴 Có người già</span>
+                <span>👴 {t('hasElderly')}</span>
               </label>
               <label className="flex items-center gap-2 text-sm">
                 <input
@@ -309,7 +312,7 @@ export function CreateTicketModal({
                   onChange={(e) => handleChange('has_children', e.target.checked)}
                   className="rounded border-gray-300"
                 />
-                <span>👶 Có trẻ em</span>
+                <span>👶 {t('hasChildren')}</span>
               </label>
               <label className="flex items-center gap-2 text-sm">
                 <input
@@ -318,7 +321,7 @@ export function CreateTicketModal({
                   onChange={(e) => handleChange('has_disabled', e.target.checked)}
                   className="rounded border-gray-300"
                 />
-                <span>♿ Có người khuyết tật</span>
+                <span>♿ {t('hasDisabled')}</span>
               </label>
             </div>
           </div>
@@ -327,12 +330,12 @@ export function CreateTicketModal({
           <div>
             <label className="mb-1 flex items-center gap-2 text-sm font-medium">
               <FileText className="h-4 w-4 text-muted-foreground" />
-              Ghi chú thêm
+              {t('additionalNote')}
             </label>
             <textarea
               value={formData.note}
               onChange={(e) => handleChange('note', e.target.value)}
-              placeholder="Mô tả tình huống, điều kiện đặc biệt..."
+              placeholder={t('notePlaceholder')}
               rows={3}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
@@ -341,7 +344,7 @@ export function CreateTicketModal({
           {/* Error message */}
           {createMutation.isError && (
             <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
-              Có lỗi xảy ra khi tạo yêu cầu. Vui lòng thử lại.
+              {t('createError')}
             </div>
           )}
         </div>
@@ -349,10 +352,10 @@ export function CreateTicketModal({
 
       <ModalFooter>
         <Button variant="outline" onClick={handleClose}>
-          Hủy
+          {tc('cancel')}
         </Button>
         <Button onClick={handleSubmit} isLoading={createMutation.isPending}>
-          Tạo yêu cầu
+          {t('createButton')}
         </Button>
       </ModalFooter>
     </Modal>

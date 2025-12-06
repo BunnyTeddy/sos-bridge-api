@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Settings,
   Bell,
@@ -16,20 +17,21 @@ import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { Button } from '@sos-bridge/ui';
 
 export default function SettingsPage() {
+  const t = useTranslations('settings');
   const [activeTab, setActiveTab] = useState('general');
 
   const tabs = [
-    { id: 'general', label: 'Chung', icon: Settings },
-    { id: 'notifications', label: 'Thông báo', icon: Bell },
-    { id: 'security', label: 'Bảo mật', icon: Shield },
-    { id: 'blockchain', label: 'Blockchain', icon: Wallet },
-    { id: 'api', label: 'API', icon: Key },
+    { id: 'general', label: t('tabs.general'), icon: Settings },
+    { id: 'notifications', label: t('tabs.notifications'), icon: Bell },
+    { id: 'security', label: t('tabs.security'), icon: Shield },
+    { id: 'blockchain', label: t('tabs.blockchain'), icon: Wallet },
+    { id: 'api', label: t('tabs.api'), icon: Key },
   ];
 
   return (
     <DashboardLayout
-      title="Cài đặt hệ thống"
-      subtitle="Quản lý cấu hình ứng dụng"
+      title={t('title')}
+      subtitle={t('subtitle')}
     >
       <div className="grid gap-6 lg:grid-cols-4">
         {/* Sidebar */}
@@ -52,25 +54,25 @@ export default function SettingsPage() {
 
         {/* Content */}
         <div className="lg:col-span-3">
-          {activeTab === 'general' && <GeneralSettings />}
-          {activeTab === 'notifications' && <NotificationSettings />}
-          {activeTab === 'security' && <SecuritySettings />}
-          {activeTab === 'blockchain' && <BlockchainSettings />}
-          {activeTab === 'api' && <ApiSettings />}
+          {activeTab === 'general' && <GeneralSettings t={t} />}
+          {activeTab === 'notifications' && <NotificationSettings t={t} />}
+          {activeTab === 'security' && <SecuritySettings t={t} />}
+          {activeTab === 'blockchain' && <BlockchainSettings t={t} />}
+          {activeTab === 'api' && <ApiSettings t={t} />}
         </div>
       </div>
     </DashboardLayout>
   );
 }
 
-function GeneralSettings() {
+function GeneralSettings({ t }: { t: any }) {
   return (
     <div className="space-y-6">
       <div className="rounded-xl border bg-card p-6">
-        <h3 className="mb-4 font-semibold">Thông tin hệ thống</h3>
+        <h3 className="mb-4 font-semibold">{t('general.systemInfo')}</h3>
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium">Tên hệ thống</label>
+            <label className="mb-1 block text-sm font-medium">{t('general.systemName')}</label>
             <input
               type="text"
               defaultValue="SOS-Bridge"
@@ -78,15 +80,15 @@ function GeneralSettings() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Khu vực hoạt động</label>
+            <label className="mb-1 block text-sm font-medium">{t('general.operatingRegion')}</label>
             <input
               type="text"
-              defaultValue="Việt Nam"
+              defaultValue="Vietnam"
               className="w-full rounded-lg border px-3 py-2 text-sm focus:border-primary focus:outline-none"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Múi giờ</label>
+            <label className="mb-1 block text-sm font-medium">{t('general.timezone')}</label>
             <select className="w-full rounded-lg border px-3 py-2 text-sm focus:border-primary focus:outline-none">
               <option>Asia/Ho_Chi_Minh (UTC+7)</option>
               <option>Asia/Bangkok (UTC+7)</option>
@@ -96,11 +98,11 @@ function GeneralSettings() {
       </div>
 
       <div className="rounded-xl border bg-card p-6">
-        <h3 className="mb-4 font-semibold">Cấu hình cứu hộ</h3>
+        <h3 className="mb-4 font-semibold">{t('general.rescueConfig')}</h3>
         <div className="space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium">
-              Phần thưởng mỗi nhiệm vụ (USDC)
+              {t('general.rewardPerMission')}
             </label>
             <input
               type="number"
@@ -110,7 +112,7 @@ function GeneralSettings() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium">
-              Bán kính tìm kiếm đội cứu hộ (km)
+              {t('general.searchRadius')}
             </label>
             <input
               type="number"
@@ -120,7 +122,7 @@ function GeneralSettings() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium">
-              Số nhiệm vụ tối đa/ngày/đội
+              {t('general.maxMissionsPerDay')}
             </label>
             <input
               type="number"
@@ -134,21 +136,21 @@ function GeneralSettings() {
       <div className="flex justify-end">
         <Button>
           <Save className="mr-2 h-4 w-4" />
-          Lưu thay đổi
+          {t('saveChanges')}
         </Button>
       </div>
     </div>
   );
 }
 
-function NotificationSettings() {
+function NotificationSettings({ t }: { t: any }) {
   return (
     <div className="space-y-6">
       <div className="rounded-xl border bg-card p-6">
-        <h3 className="mb-4 font-semibold">Telegram Bot</h3>
+        <h3 className="mb-4 font-semibold">{t('notifications.telegramBot')}</h3>
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium">Bot Token</label>
+            <label className="mb-1 block text-sm font-medium">{t('notifications.botToken')}</label>
             <input
               type="password"
               defaultValue="••••••••••••••••"
@@ -156,7 +158,7 @@ function NotificationSettings() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Webhook URL</label>
+            <label className="mb-1 block text-sm font-medium">{t('notifications.webhookUrl')}</label>
             <input
               type="text"
               placeholder="https://your-domain.com/api/telegram/webhook"
@@ -167,22 +169,22 @@ function NotificationSettings() {
       </div>
 
       <div className="rounded-xl border bg-card p-6">
-        <h3 className="mb-4 font-semibold">Cấu hình thông báo</h3>
+        <h3 className="mb-4 font-semibold">{t('notifications.config')}</h3>
         <div className="space-y-3">
           <label className="flex items-center justify-between">
-            <span className="text-sm">Thông báo yêu cầu mới</span>
+            <span className="text-sm">{t('notifications.newRequest')}</span>
             <input type="checkbox" defaultChecked className="rounded" />
           </label>
           <label className="flex items-center justify-between">
-            <span className="text-sm">Thông báo nhiệm vụ hoàn thành</span>
+            <span className="text-sm">{t('notifications.missionComplete')}</span>
             <input type="checkbox" defaultChecked className="rounded" />
           </label>
           <label className="flex items-center justify-between">
-            <span className="text-sm">Thông báo giao dịch</span>
+            <span className="text-sm">{t('notifications.transaction')}</span>
             <input type="checkbox" defaultChecked className="rounded" />
           </label>
           <label className="flex items-center justify-between">
-            <span className="text-sm">Cảnh báo hệ thống</span>
+            <span className="text-sm">{t('notifications.systemAlert')}</span>
             <input type="checkbox" defaultChecked className="rounded" />
           </label>
         </div>
@@ -191,18 +193,18 @@ function NotificationSettings() {
       <div className="flex justify-end">
         <Button>
           <Save className="mr-2 h-4 w-4" />
-          Lưu thay đổi
+          {t('saveChanges')}
         </Button>
       </div>
     </div>
   );
 }
 
-function SecuritySettings() {
+function SecuritySettings({ t }: { t: any }) {
   return (
     <div className="space-y-6">
       <div className="rounded-xl border bg-card p-6">
-        <h3 className="mb-4 font-semibold">Quản trị viên</h3>
+        <h3 className="mb-4 font-semibold">{t('security.administrators')}</h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between rounded-lg bg-muted p-3">
             <div>
@@ -215,19 +217,19 @@ function SecuritySettings() {
           </div>
         </div>
         <button className="mt-3 text-sm text-primary hover:underline">
-          + Thêm quản trị viên
+          + {t('security.addAdmin')}
         </button>
       </div>
 
       <div className="rounded-xl border bg-card p-6">
-        <h3 className="mb-4 font-semibold">Bảo mật</h3>
+        <h3 className="mb-4 font-semibold">{t('security.title')}</h3>
         <div className="space-y-3">
           <label className="flex items-center justify-between">
-            <span className="text-sm">Bật xác thực 2 lớp (2FA)</span>
+            <span className="text-sm">{t('security.enable2FA')}</span>
             <input type="checkbox" className="rounded" />
           </label>
           <label className="flex items-center justify-between">
-            <span className="text-sm">Yêu cầu đăng nhập lại sau 24h</span>
+            <span className="text-sm">{t('security.reloginAfter24h')}</span>
             <input type="checkbox" defaultChecked className="rounded" />
           </label>
         </div>
@@ -236,28 +238,28 @@ function SecuritySettings() {
       <div className="flex justify-end">
         <Button>
           <Save className="mr-2 h-4 w-4" />
-          Lưu thay đổi
+          {t('saveChanges')}
         </Button>
       </div>
     </div>
   );
 }
 
-function BlockchainSettings() {
+function BlockchainSettings({ t }: { t: any }) {
   return (
     <div className="space-y-6">
       <div className="rounded-xl border bg-card p-6">
-        <h3 className="mb-4 font-semibold">Cấu hình Blockchain</h3>
+        <h3 className="mb-4 font-semibold">{t('blockchain.config')}</h3>
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium">Mạng</label>
+            <label className="mb-1 block text-sm font-medium">{t('blockchain.network')}</label>
             <select className="w-full rounded-lg border px-3 py-2 text-sm focus:border-primary focus:outline-none">
               <option value="base_sepolia">Base Sepolia (Testnet)</option>
               <option value="base_mainnet">Base Mainnet</option>
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">RPC URL</label>
+            <label className="mb-1 block text-sm font-medium">{t('blockchain.rpcUrl')}</label>
             <input
               type="text"
               defaultValue="https://sepolia.base.org"
@@ -266,7 +268,7 @@ function BlockchainSettings() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium">
-              USDC Contract Address
+              {t('blockchain.usdcContract')}
             </label>
             <input
               type="text"
@@ -278,11 +280,11 @@ function BlockchainSettings() {
       </div>
 
       <div className="rounded-xl border bg-card p-6">
-        <h3 className="mb-4 font-semibold">Ví ngân quỹ</h3>
+        <h3 className="mb-4 font-semibold">{t('blockchain.treasuryWallet')}</h3>
         <div className="space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium">
-              Treasury Private Key
+              {t('blockchain.privateKey')}
             </label>
             <input
               type="password"
@@ -290,7 +292,7 @@ function BlockchainSettings() {
               className="w-full rounded-lg border px-3 py-2 text-sm focus:border-primary focus:outline-none"
             />
             <p className="mt-1 text-xs text-muted-foreground">
-              ⚠️ Không chia sẻ private key với bất kỳ ai
+              ⚠️ {t('blockchain.privateKeyWarning')}
             </p>
           </div>
         </div>
@@ -299,38 +301,38 @@ function BlockchainSettings() {
       <div className="flex justify-end">
         <Button>
           <Save className="mr-2 h-4 w-4" />
-          Lưu thay đổi
+          {t('saveChanges')}
         </Button>
       </div>
     </div>
   );
 }
 
-function ApiSettings() {
+function ApiSettings({ t }: { t: any }) {
   return (
     <div className="space-y-6">
       <div className="rounded-xl border bg-card p-6">
-        <h3 className="mb-4 font-semibold">API Keys</h3>
+        <h3 className="mb-4 font-semibold">{t('api.apiKeys')}</h3>
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium">Google API Key</label>
+            <label className="mb-1 block text-sm font-medium">{t('api.googleApiKey')}</label>
             <input
               type="password"
               defaultValue="••••••••••••••••"
               className="w-full rounded-lg border px-3 py-2 text-sm focus:border-primary focus:outline-none"
             />
             <p className="mt-1 text-xs text-muted-foreground">
-              Dùng cho Gemini AI và Geocoding
+              {t('api.googleApiKeyDesc')}
             </p>
           </div>
         </div>
       </div>
 
       <div className="rounded-xl border bg-card p-6">
-        <h3 className="mb-4 font-semibold">Database</h3>
+        <h3 className="mb-4 font-semibold">{t('api.database')}</h3>
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium">Database URL</label>
+            <label className="mb-1 block text-sm font-medium">{t('api.databaseUrl')}</label>
             <input
               type="text"
               defaultValue="postgresql://user:pass@localhost:5432/sosbridge"
@@ -339,7 +341,7 @@ function ApiSettings() {
           </div>
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-green-500" />
-            <span className="text-sm text-green-700">Kết nối thành công</span>
+            <span className="text-sm text-green-700">{t('api.connectionSuccess')}</span>
           </div>
         </div>
       </div>
@@ -347,7 +349,7 @@ function ApiSettings() {
       <div className="flex justify-end">
         <Button>
           <Save className="mr-2 h-4 w-4" />
-          Lưu thay đổi
+          {t('saveChanges')}
         </Button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { X, AlertTriangle, Info, CheckCircle } from 'lucide-react';
 import { Button } from '@sos-bridge/ui';
 
@@ -49,13 +50,17 @@ export function ConfirmDialog({
   onConfirm,
   title,
   message,
-  confirmText = 'Xác nhận',
-  cancelText = 'Hủy',
+  confirmText,
+  cancelText,
   variant = 'danger',
   isLoading = false,
 }: ConfirmDialogProps) {
+  const t = useTranslations('modal.confirm');
   const config = variantConfig[variant];
   const Icon = config.icon;
+  
+  const confirmLabel = confirmText || t('defaultConfirm');
+  const cancelLabel = cancelText || t('defaultCancel');
 
   const handleConfirm = async () => {
     await onConfirm();
@@ -95,18 +100,19 @@ export function ConfirmDialog({
         {/* Actions */}
         <div className="mt-6 flex justify-end gap-3">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            {cancelText}
+            {cancelLabel}
           </Button>
           <Button
             variant={config.buttonVariant}
             onClick={handleConfirm}
             isLoading={isLoading}
           >
-            {confirmText}
+            {confirmLabel}
           </Button>
         </div>
       </div>
     </div>
   );
 }
+
 

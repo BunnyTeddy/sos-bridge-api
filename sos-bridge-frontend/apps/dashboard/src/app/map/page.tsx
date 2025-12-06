@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { X, MapPin, Users, Phone, Navigation } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { LiveMap } from '@/components/map/live-map';
@@ -12,6 +13,7 @@ import { StatusBadge, PriorityBadge, formatRelativeTime, formatPhone } from '@so
 import { Spinner } from '@sos-bridge/ui';
 
 export default function MapPage() {
+  const t = useTranslations('map');
   const [selectedTicket, setSelectedTicket] = useState<RescueTicket | null>(null);
   const [selectedRescuer, setSelectedRescuer] = useState<Rescuer | null>(null);
 
@@ -39,8 +41,8 @@ export default function MapPage() {
 
   return (
     <DashboardLayout
-      title="Bản đồ trực tiếp"
-      subtitle={`${tickets.length} yêu cầu • ${rescuers.filter((r) => r.status === 'ONLINE').length} đội online`}
+      title={t('title')}
+      subtitle={t('subtitle', { tickets: tickets.length, online: rescuers.filter((r) => r.status === 'ONLINE').length })}
       onRefresh={handleRefresh}
     >
       <div className="relative h-[calc(100vh-140px)]">
@@ -61,7 +63,7 @@ export default function MapPage() {
             {selectedTicket && (
               <div className="absolute right-4 top-20 z-[1001] w-80 rounded-xl bg-card shadow-xl">
                 <div className="flex items-center justify-between border-b p-4">
-                  <h3 className="font-semibold">Chi tiết yêu cầu</h3>
+                  <h3 className="font-semibold">{t('ticketDetail')}</h3>
                   <button
                     onClick={() => setSelectedTicket(null)}
                     className="rounded-lg p-1 hover:bg-muted"
@@ -85,7 +87,7 @@ export default function MapPage() {
                   <div className="mb-3 flex items-center gap-2">
                     <Users className="h-4 w-4 text-muted-foreground" />
                     <p className="text-sm">
-                      {selectedTicket.victim_info.people_count} người cần cứu
+                      {t('peopleNeedRescue', { count: selectedTicket.victim_info.people_count })}
                     </p>
                   </div>
 
@@ -105,7 +107,7 @@ export default function MapPage() {
                   )}
 
                   <p className="text-xs text-muted-foreground">
-                    Tạo lúc: {formatRelativeTime(selectedTicket.created_at)}
+                    {t('createdAt')}: {formatRelativeTime(selectedTicket.created_at)}
                   </p>
 
                   <div className="mt-4 flex gap-2">
@@ -119,13 +121,13 @@ export default function MapPage() {
                       className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-blue-500 py-2 text-sm font-medium text-white"
                     >
                       <Navigation className="h-4 w-4" />
-                      Chỉ đường
+                      {t('directions')}
                     </button>
                     <a
                       href={`/tickets/${selectedTicket.ticket_id}`}
                       className="flex flex-1 items-center justify-center rounded-lg bg-muted py-2 text-sm font-medium"
                     >
-                      Chi tiết
+                      {t('details')}
                     </a>
                   </div>
                 </div>
@@ -136,7 +138,7 @@ export default function MapPage() {
             {selectedRescuer && (
               <div className="absolute right-4 top-20 z-[1001] w-80 rounded-xl bg-card shadow-xl">
                 <div className="flex items-center justify-between border-b p-4">
-                  <h3 className="font-semibold">Đội cứu hộ</h3>
+                  <h3 className="font-semibold">{t('rescueTeam')}</h3>
                   <button
                     onClick={() => setSelectedRescuer(null)}
                     className="rounded-lg p-1 hover:bg-muted"
@@ -162,13 +164,13 @@ export default function MapPage() {
                       <p className="text-lg font-bold">
                         {selectedRescuer.rating.toFixed(1)}
                       </p>
-                      <p className="text-xs text-muted-foreground">Đánh giá</p>
+                      <p className="text-xs text-muted-foreground">{t('rating')}</p>
                     </div>
                     <div className="rounded-lg bg-muted p-2 text-center">
                       <p className="text-lg font-bold">
                         {selectedRescuer.completed_missions}
                       </p>
-                      <p className="text-xs text-muted-foreground">Nhiệm vụ</p>
+                      <p className="text-xs text-muted-foreground">{t('missions')}</p>
                     </div>
                   </div>
 
@@ -185,13 +187,13 @@ export default function MapPage() {
                       className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-green-500 py-2 text-sm font-medium text-white"
                     >
                       <Phone className="h-4 w-4" />
-                      Gọi điện
+                      {t('call')}
                     </a>
                     <a
                       href={`/rescuers/${selectedRescuer.rescuer_id}`}
                       className="flex flex-1 items-center justify-center rounded-lg bg-muted py-2 text-sm font-medium"
                     >
-                      Chi tiết
+                      {t('details')}
                     </a>
                   </div>
                 </div>

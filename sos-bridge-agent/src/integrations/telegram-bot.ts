@@ -16,6 +16,14 @@ import {
   setRescuerOffline,
   showRescuerProfile,
 } from './registration-flow.js';
+import {
+  messages,
+  t,
+  getUserLanguage,
+  setUserLanguage,
+  isValidLanguage,
+  Language,
+} from '../i18n/index.js';
 
 // ============ CONFIGURATION ============
 
@@ -143,88 +151,53 @@ function registerCommandHandlers(bot: TelegramBot): void {
   // /start command
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
+    const userId = msg.from?.id?.toString() || '';
     const userName = msg.from?.first_name || 'bạn';
+    const lang = getUserLanguage(userId);
 
-    const welcomeMessage = `
-🚨 Chào mừng ${userName} đến với SOS-Bridge!
-
-Đây là hệ thống điều phối cứu nạn sử dụng AI.
-
-Cách sử dụng:
-1. Gửi tin nhắn mô tả tình huống cần cứu trợ
-2. Cung cấp địa chỉ/vị trí và số điện thoại
-3. Hệ thống sẽ tự động tìm đội cứu hộ gần nhất
-
-Ví dụ tin nhắn:
-"Cứu với! Nhà ông Ba ở xóm Bàu, xã Hải Thượng bị ngập. Có 3 người mắc kẹt. SĐT: 0909123456"
-
-Lệnh hỗ trợ:
-/help - Xem hướng dẫn chi tiết
-/status - Kiểm tra trạng thái hệ thống
-/mytickets - Xem các yêu cầu của bạn
-
-Hãy gửi tin nhắn cầu cứu ngay nếu bạn cần hỗ trợ! 🆘
-    `.trim();
-
+    const welcomeMessage = t('welcome', lang)(userName);
     await bot.sendMessage(chatId, welcomeMessage);
+  });
+
+  // /lang command - Change language
+  bot.onText(/\/lang\s*(.*)/, async (msg, match) => {
+    const chatId = msg.chat.id;
+    const userId = msg.from?.id?.toString() || '';
+    const newLang = match?.[1]?.trim().toLowerCase() || '';
+    const currentLang = getUserLanguage(userId);
+
+    if (!newLang) {
+      // Show current language and options
+      await bot.sendMessage(chatId, t('langCommand', currentLang));
+      return;
+    }
+
+    if (!isValidLanguage(newLang)) {
+      await bot.sendMessage(chatId, t('langInvalid', currentLang));
+      return;
+    }
+
+    setUserLanguage(userId, newLang as Language);
+    await bot.sendMessage(chatId, t('langChanged', newLang as Language));
   });
 
   // /help command
   bot.onText(/\/help/, async (msg) => {
     const chatId = msg.chat.id;
+    const userId = msg.from?.id?.toString() || '';
+    const lang = getUserLanguage(userId);
 
-    const helpMessage = `
-📖 Hướng dẫn sử dụng SOS-Bridge
-
-1. Gửi yêu cầu cứu trợ:
-- Mô tả tình huống ngắn gọn
-- Địa chỉ chính xác (xóm, thôn, xã, huyện)
-- Số điện thoại liên hệ
-- Số người cần cứu
-
-2. Nếu bạn là đội cứu hộ:
-- Đăng ký qua /register
-- Bật trạng thái sẵn sàng /online
-- Nhận thông báo nhiệm vụ tự động
-- Gửi ảnh xác nhận hoàn thành
-
-3. Theo dõi tiến độ:
-- Nhận thông báo real-time
-- Xem trạng thái ticket
-- Nhận thưởng USDC khi hoàn thành
-
-Liên hệ hỗ trợ: admin@sosbridge.vn
-    `.trim();
-
-    await bot.sendMessage(chatId, helpMessage);
+    await bot.sendMessage(chatId, t('help', lang));
   });
 
   // /status command
   bot.onText(/\/status/, async (msg) => {
     const chatId = msg.chat.id;
+    const userId = msg.from?.id?.toString() || '';
+    const lang = getUserLanguage(userId);
     const stats = await store.getStats();
 
-    const statusMessage = `
-📊 Trạng thái hệ thống SOS-Bridge
-
-Tickets:
-- Tổng: ${stats.tickets.total}
-- Đang mở: ${stats.tickets.open}
-- Đang xử lý: ${stats.tickets.in_progress}
-- Hoàn thành: ${stats.tickets.completed}
-
-Đội cứu hộ:
-- Tổng đăng ký: ${stats.rescuers.total}
-- Đang online: ${stats.rescuers.online}
-- Đang làm nhiệm vụ: ${stats.rescuers.on_mission}
-
-Giao dịch:
-- Tổng: ${stats.transactions.total}
-- Đã giải ngân: ${stats.transactions.total_disbursed_usdc} USDC
-
-✅ Hệ thống đang hoạt động bình thường
-    `.trim();
-
+    const statusMessage = t('status', lang)(stats);
     await bot.sendMessage(chatId, statusMessage);
   });
 
@@ -248,12 +221,14 @@ Giao dịch:
 
       console.log(`[Telegram] User tickets found: ${userTickets.length}`);
 
+      const lang = getUserLanguage(userId);
+
       if (userTickets.length === 0) {
-        await bot.sendMessage(chatId, '📭 Bạn chưa có yêu cầu cứu trợ nào.\n\n💡 Gửi tin nhắn mô tả tình huống để tạo yêu cầu mới.');
+        await bot.sendMessage(chatId, t('noTickets', lang));
         return;
       }
 
-      let message = '📋 Các yêu cầu của bạn:\n\n';
+      let message = t('ticketListHeader', lang);
       
       for (const ticket of userTickets) {
         const statusEmoji = getStatusEmoji(ticket.status);
@@ -266,7 +241,8 @@ Giao dịch:
       await bot.sendMessage(chatId, message);
     } catch (error) {
       console.error('[Telegram] Error in /mytickets:', error);
-      await bot.sendMessage(chatId, '❌ Có lỗi xảy ra. Vui lòng thử lại.');
+      const lang = getUserLanguage(userId);
+      await bot.sendMessage(chatId, t('genericError', lang));
     }
   });
 
@@ -278,7 +254,8 @@ Giao dịch:
     const userId = msg.from?.id;
 
     if (!userId) {
-      await bot.sendMessage(chatId, '❌ Không thể xác định người dùng.');
+      const lang = getUserLanguage(msg.from?.id?.toString() || '');
+      await bot.sendMessage(chatId, t('userNotFound', lang));
       return;
     }
 
@@ -291,21 +268,17 @@ Giao dịch:
     const chatId = msg.chat.id;
     const userId = msg.from?.id;
     const walletAddress = match?.[1]?.trim() || '';
+    const lang = getUserLanguage(userId?.toString() || '');
 
     if (!userId) {
-      await bot.sendMessage(chatId, '❌ Không thể xác định người dùng.');
+      await bot.sendMessage(chatId, t('userNotFound', lang));
       return;
     }
 
     console.log(`[Telegram] /wallet command from user ${userId}: ${walletAddress}`);
 
     if (!walletAddress) {
-      await bot.sendMessage(
-        chatId,
-        '💳 Cách sử dụng: /wallet <địa_chỉ_ví>\n\n' +
-        'Ví dụ: /wallet 0x742d35Cc6634C0532925a3b844Bc9e7595f5C000\n\n' +
-        'Địa chỉ phải là ví Ethereum (Base Sepolia).'
-      );
+      await bot.sendMessage(chatId, t('walletUsage', lang));
       return;
     }
 
@@ -316,9 +289,10 @@ Giao dịch:
   bot.onText(/\/online/, async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from?.id;
+    const lang = getUserLanguage(userId?.toString() || '');
 
     if (!userId) {
-      await bot.sendMessage(chatId, '❌ Không thể xác định người dùng.');
+      await bot.sendMessage(chatId, t('userNotFound', lang));
       return;
     }
 
@@ -337,9 +311,10 @@ Giao dịch:
   bot.onText(/\/offline/, async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from?.id;
+    const lang = getUserLanguage(userId?.toString() || '');
 
     if (!userId) {
-      await bot.sendMessage(chatId, '❌ Không thể xác định người dùng.');
+      await bot.sendMessage(chatId, t('userNotFound', lang));
       return;
     }
 
@@ -351,9 +326,10 @@ Giao dịch:
   bot.onText(/\/profile/, async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from?.id;
+    const lang = getUserLanguage(userId?.toString() || '');
 
     if (!userId) {
-      await bot.sendMessage(chatId, '❌ Không thể xác định người dùng.');
+      await bot.sendMessage(chatId, t('userNotFound', lang));
       return;
     }
 
@@ -372,7 +348,8 @@ Giao dịch:
       // Will be handled by registration flow
       await handleRegistrationMessage(bot, chatId, userId, '/cancel');
     } else {
-      await bot.sendMessage(chatId, '❓ Không có gì để hủy.');
+      const lang = getUserLanguage(userId.toString());
+      await bot.sendMessage(chatId, t('nothingToCancel', lang));
     }
   });
 }
@@ -400,9 +377,10 @@ function registerMessageHandlers(bot: TelegramBot): void {
           last_updated: Date.now(),
         },
       });
+      const lang = getUserLanguage(userId.toString());
       await bot.sendMessage(
         chatId,
-        `📍 Đã cập nhật vị trí: ${msg.location.latitude.toFixed(4)}, ${msg.location.longitude.toFixed(4)}`
+        t('locationUpdated', lang)(msg.location.latitude, msg.location.longitude)
       );
     }
   });
@@ -435,10 +413,12 @@ function registerMessageHandlers(bot: TelegramBot): void {
 
     const userIdStr = userId.toString();
 
+    const lang = getUserLanguage(userIdStr);
+
     // Check if user is already being processed (prevent race condition)
     if (processingUsers.has(userIdStr)) {
       console.log(`[Telegram] User ${userIdStr} already has message being processed, skipping`);
-      await bot.sendMessage(chatId, '⏳ Tin nhắn trước của bạn đang được xử lý. Vui lòng đợi...');
+      await bot.sendMessage(chatId, t('alreadyProcessing', lang));
       return;
     }
 
@@ -446,20 +426,7 @@ function registerMessageHandlers(bot: TelegramBot): void {
     if (!isSosMessage(messageText)) {
       // Not an SOS message - respond with simple greeting
       console.log(`[Telegram] Non-SOS message detected, sending simple response`);
-      await bot.sendMessage(
-        chatId,
-        `Xin chào! Tôi là bot cứu trợ SOS-Bridge.
-
-Nếu bạn cần cứu trợ khẩn cấp, hãy gửi tin nhắn mô tả tình huống với:
-- Địa chỉ/vị trí
-- Số điện thoại
-- Số người cần cứu
-
-Ví dụ: "Cứu với! Nhà tôi ở xã Hải Thượng bị ngập. Có 2 người mắc kẹt. SĐT: 0909123456"
-
-Gõ /help để xem hướng dẫn chi tiết.
-Đội cứu hộ: /register để đăng ký nhận nhiệm vụ.`
-      );
+      await bot.sendMessage(chatId, t('nonSosResponse', lang));
       return;
     }
 
@@ -472,7 +439,7 @@ Gõ /help để xem hướng dẫn chi tiết.
     try {
       processingMsg = await bot.sendMessage(
         chatId,
-        '⏳ Đang xử lý tin nhắn cầu cứu của bạn...',
+        t('processingMessage', lang),
       );
     } catch (err) {
       console.error('[Telegram] Error sending processing message:', err);
@@ -503,15 +470,15 @@ Gõ /help để xem hướng dẫn chi tiết.
       }
 
       // Format and send result (without Markdown to avoid parsing issues)
-      const formattedResult = formatWorkflowResult(result);
+      const formattedResult = formatWorkflowResult(result, lang);
       console.log('[Telegram] Sending result to chat:', chatId);
       
       await bot.sendMessage(chatId, formattedResult, {
         reply_markup: {
           inline_keyboard: [
             [
-              { text: '✅ Xác nhận thông tin đúng', callback_data: 'confirm_sos' },
-              { text: '❌ Sửa thông tin', callback_data: 'edit_sos' },
+              { text: t('confirmButton', lang), callback_data: 'confirm_sos' },
+              { text: t('editButton', lang), callback_data: 'edit_sos' },
             ],
           ],
         },
@@ -538,8 +505,8 @@ Gõ /help để xem hướng dẫn chi tiết.
       }
 
       const errorMessage = error instanceof Error && error.message === 'Workflow timeout'
-        ? '⏱️ Xử lý quá lâu. Vui lòng thử lại sau.'
-        : '❌ Có lỗi xảy ra khi xử lý tin nhắn. Vui lòng thử lại sau.';
+        ? t('workflowTimeout', lang)
+        : t('processingError', lang);
 
       await bot.sendMessage(chatId, errorMessage);
     } finally {
@@ -558,13 +525,14 @@ function registerPhotoHandlers(bot: TelegramBot): void {
     const chatId = msg.chat.id;
     const userId = msg.from?.id.toString() || 'anonymous';
     const caption = msg.caption || '';
+    const lang = getUserLanguage(userId);
 
     console.log(`[Telegram] Received photo from ${userId} with caption: ${caption}`);
 
     // Get the largest photo (last in array)
     const photo = msg.photo?.[msg.photo.length - 1];
     if (!photo) {
-      await bot.sendMessage(chatId, '❌ Không thể xử lý ảnh. Vui lòng thử lại.');
+      await bot.sendMessage(chatId, t('photoError', lang));
       return;
     }
 
@@ -573,7 +541,7 @@ function registerPhotoHandlers(bot: TelegramBot): void {
     try {
       processingMsg = await bot.sendMessage(
         chatId,
-        '🔍 Đang phân tích ảnh xác nhận cứu hộ...',
+        t('processingPhoto', lang),
       );
     } catch (err) {
       console.error('[Telegram] Error sending processing message:', err);
@@ -591,10 +559,7 @@ function registerPhotoHandlers(bot: TelegramBot): void {
         if (processingMsg) {
           await bot.deleteMessage(chatId, processingMsg.message_id).catch(() => {});
         }
-        await bot.sendMessage(
-          chatId,
-          '⚠️ Vui lòng gửi ảnh kèm caption có mã ticket.\nVí dụ: "Ticket: SOS_VN_001"',
-        );
+        await bot.sendMessage(chatId, t('photoMissingTicket', lang));
         return;
       }
 
@@ -612,7 +577,7 @@ function registerPhotoHandlers(bot: TelegramBot): void {
       }
 
       // Send verification result
-      await bot.sendMessage(chatId, formatVerificationResult(result));
+      await bot.sendMessage(chatId, formatVerificationResult(result, lang));
 
     } catch (error) {
       console.error('[Telegram] Error processing photo:', error);
@@ -622,8 +587,8 @@ function registerPhotoHandlers(bot: TelegramBot): void {
       }
 
       const errorMessage = error instanceof Error && error.message === 'Workflow timeout'
-        ? '⏱️ Xử lý ảnh quá lâu. Vui lòng thử lại sau.'
-        : '❌ Có lỗi xảy ra khi xác thực ảnh. Vui lòng thử lại sau.';
+        ? t('photoTimeout', lang)
+        : t('photoVerifyError', lang);
 
       await bot.sendMessage(chatId, errorMessage);
     }
@@ -638,6 +603,7 @@ function registerCallbackHandlers(bot: TelegramBot): void {
     const userId = query.from.id;
     const userIdStr = userId.toString();
     const data = query.data;
+    const lang = getUserLanguage(userIdStr);
 
     if (!chatId || !data) return;
 
@@ -656,25 +622,19 @@ function registerCallbackHandlers(bot: TelegramBot): void {
       if (data.startsWith('accept_mission:')) {
         await handleAcceptMissionById(bot, chatId, userIdStr, ticketId);
       } else {
-        await bot.sendMessage(chatId, '❌ Đã từ chối nhiệm vụ. Hệ thống sẽ tìm đội cứu hộ khác.');
+        await bot.sendMessage(chatId, t('declinedMission', lang));
       }
       return;
     }
 
     switch (data) {
       case 'confirm_sos':
-        await bot.sendMessage(
-          chatId,
-          '✅ Đã xác nhận! Hệ thống đang tìm đội cứu hộ gần nhất...\n\nBạn sẽ nhận được thông báo khi có đội cứu hộ nhận nhiệm vụ.',
-        );
+        await bot.sendMessage(chatId, t('confirmSos', lang));
         // In production: trigger dispatch workflow here
         break;
 
       case 'edit_sos':
-        await bot.sendMessage(
-          chatId,
-          '📝 Vui lòng gửi lại tin nhắn với thông tin đã chỉnh sửa.',
-        );
+        await bot.sendMessage(chatId, t('editSos', lang));
         break;
 
       case 'accept_mission':
@@ -682,10 +642,7 @@ function registerCallbackHandlers(bot: TelegramBot): void {
         break;
 
       case 'decline_mission':
-        await bot.sendMessage(
-          chatId,
-          '❌ Đã từ chối nhiệm vụ. Hệ thống sẽ tìm đội cứu hộ khác.',
-        );
+        await bot.sendMessage(chatId, t('declinedMission', lang));
         break;
 
       default:
@@ -748,27 +705,24 @@ export async function sendDispatchNotifications(
     .map(async (rescuer) => {
       try {
         const priorityEmoji = getPriorityEmoji(ticket.priority);
+        const lang = getUserLanguage(rescuer.telegram_user_id!.toString());
+        const address = ticket.location.address_text || `${ticket.location.lat.toFixed(4)}, ${ticket.location.lng.toFixed(4)}`;
         
-        const message = `
-🚨 ${priorityEmoji} NHIỆM VỤ CỨU HỘ MỚI!
-
-📍 Địa điểm: ${ticket.location.address_text || `${ticket.location.lat.toFixed(4)}, ${ticket.location.lng.toFixed(4)}`}
-📏 Khoảng cách: ${rescuer.distance.toFixed(1)} km từ bạn
-👥 Số người cần cứu: ${ticket.victim_info.people_count}
-💰 Thù lao: ${reward} USDC
-⚡ Mức độ: ${ticket.priority}/5
-
-📋 Mã ticket: ${ticket.ticket_id}
-
-⏰ Ai nhận trước sẽ được giao nhiệm vụ!
-        `.trim();
+        const message = t('newMission', lang)(
+          priorityEmoji,
+          address,
+          rescuer.distance,
+          ticket.victim_info.people_count,
+          reward,
+          ticket.ticket_id
+        );
 
         await bot!.sendMessage(rescuer.telegram_user_id!, message, {
           reply_markup: {
             inline_keyboard: [
               [
-                { text: '✅ NHẬN NHIỆM VỤ', callback_data: `accept_mission:${ticket.ticket_id}` },
-                { text: '❌ Từ chối', callback_data: `decline_mission:${ticket.ticket_id}` },
+                { text: t('acceptMissionButton', lang), callback_data: `accept_mission:${ticket.ticket_id}` },
+                { text: t('declineMissionButton', lang), callback_data: `decline_mission:${ticket.ticket_id}` },
               ],
             ],
           },
@@ -824,23 +778,15 @@ export async function notifyRescuerNewMission(
   }
 
   try {
-    const message = `
-🚨 CÓ NHIỆM VỤ MỚI!
-
-📍 Địa điểm: ${address}
-📏 Khoảng cách: ${distance.toFixed(1)} km
-👥 Số người cần cứu: ${victimCount}
-💰 Thù lao: ${reward} USDC
-
-Mã ticket: ${ticketId}
-    `.trim();
+    const lang = getUserLanguage(rescuerTelegramId.toString());
+    const message = t('newMission', lang)('🚨', address, distance, victimCount, reward, ticketId);
 
     await bot.sendMessage(rescuerTelegramId, message, {
       reply_markup: {
         inline_keyboard: [
           [
-            { text: '✅ NHẬN NHIỆM VỤ', callback_data: `accept_mission:${ticketId}` },
-            { text: '❌ Từ chối', callback_data: `decline_mission:${ticketId}` },
+            { text: t('acceptMissionButton', lang), callback_data: `accept_mission:${ticketId}` },
+            { text: t('declineMissionButton', lang), callback_data: `decline_mission:${ticketId}` },
           ],
         ],
       },
@@ -870,37 +816,20 @@ export async function notifyVictimStatus(
   }
 
   try {
+    const lang = getUserLanguage(victimTelegramId.toString());
     let message = '';
 
     switch (status) {
       case 'ASSIGNED':
-        message = `
-✅ Tin tốt!
-
-Đã tìm được đội cứu hộ cho yêu cầu của bạn.
-
-👤 Đội cứu hộ: ${rescuerName || 'N/A'}
-⏱️ Thời gian dự kiến: ${eta || 'N/A'} phút
-📋 Mã ticket: ${ticketId}
-
-Hãy giữ liên lạc và chờ đợi ở vị trí an toàn!
-        `.trim();
+        message = t('victimAssigned', lang)(rescuerName || 'N/A', eta || 15, ticketId);
         break;
 
       case 'COMPLETED':
-        message = `
-🎉 Nhiệm vụ hoàn thành!
-
-Đội cứu hộ đã xác nhận đã tiếp cận và hỗ trợ bạn thành công.
-
-📋 Mã ticket: ${ticketId}
-
-Cảm ơn bạn đã sử dụng SOS-Bridge. Chúc bạn bình an!
-        `.trim();
+        message = t('victimCompleted', lang)(ticketId);
         break;
 
       default:
-        message = `📋 Ticket ${ticketId}: Trạng thái đã cập nhật thành ${status}`;
+        message = `📋 Ticket ${ticketId}: ${status}`;
     }
 
     await bot.sendMessage(victimTelegramId, message);
@@ -927,18 +856,9 @@ export async function notifyRewardSent(
 
   try {
     const explorerUrl = `https://sepolia.basescan.org/tx/${txHash}`;
+    const lang = getUserLanguage(rescuerTelegramId.toString());
     
-    const message = `
-💰 Đã nhận thưởng!
-
-Cảm ơn bạn đã hoàn thành nhiệm vụ cứu hộ!
-
-📋 Ticket: ${ticketId}
-💵 Số tiền: ${amount} USDC
-🔗 TX Hash: ${txHash.substring(0, 20)}...
-
-Xem giao dịch: ${explorerUrl}
-    `.trim();
+    const message = t('rewardSent', lang)(ticketId, amount, txHash, explorerUrl);
 
     await bot.sendMessage(rescuerTelegramId, message, {
       disable_web_page_preview: true,
@@ -962,9 +882,10 @@ async function handleAcceptMission(
   // Extract ticket ID from message
   const ticketIdMatch = messageText.match(/ticket[:\s]*([A-Z0-9_]+)/i);
   const ticketId = ticketIdMatch?.[1];
+  const lang = getUserLanguage(userId);
 
   if (!ticketId) {
-    await bot.sendMessage(chatId, '❌ Không tìm thấy mã ticket.');
+    await bot.sendMessage(chatId, t('ticketNotFound', lang));
     return;
   }
 
@@ -978,6 +899,7 @@ async function handleAcceptMissionById(
   ticketId: string,
 ): Promise<void> {
   console.log(`[Telegram] User ${userId} trying to accept mission ${ticketId}`);
+  const lang = getUserLanguage(userId);
 
   // Find rescuer by telegram user ID
   const allRescuers = await store.getAllRescuers();
@@ -986,20 +908,13 @@ async function handleAcceptMissionById(
   );
 
   if (!rescuer) {
-    await bot.sendMessage(
-      chatId,
-      '❌ Bạn chưa đăng ký làm đội cứu hộ.\n\nVui lòng đăng ký với /register trước.'
-    );
+    await bot.sendMessage(chatId, t('notRegistered', lang));
     return;
   }
 
   // Check if rescuer has wallet
   if (!rescuer.wallet_address) {
-    await bot.sendMessage(
-      chatId,
-      '⚠️ Bạn chưa thiết lập ví nhận thưởng.\n\n' +
-      'Vui lòng thiết lập ví trước khi nhận nhiệm vụ: /wallet <địa_chỉ>'
-    );
+    await bot.sendMessage(chatId, t('noWallet', lang));
     return;
   }
 
@@ -1019,15 +934,13 @@ async function handleAcceptMissionById(
     // Lấy thông tin ticket sau khi đã assign
     const ticket = result.ticket!;
 
-    await bot.sendMessage(
-      chatId,
-      `✅ Đã nhận nhiệm vụ ${ticketId}!\n\n` +
-      `📍 Địa điểm: ${ticket.location.address_text || 'N/A'}\n` +
-      `📞 SĐT nạn nhân: ${ticket.victim_info.phone}\n` +
-      `👥 Số người: ${ticket.victim_info.people_count}\n\n` +
-      `Hãy di chuyển đến địa điểm và gửi ảnh xác nhận khi hoàn thành.\n\n` +
-      `📸 Gửi ảnh kèm caption: "Ticket: ${ticketId}"`
+    const acceptedMessage = t('missionAccepted', lang)(
+      ticketId,
+      ticket.location.address_text || 'N/A',
+      ticket.victim_info.phone,
+      ticket.victim_info.people_count
     );
+    await bot.sendMessage(chatId, acceptedMessage);
 
     console.log(`[Telegram] ✅ Rescuer ${rescuer.rescuer_id} (${rescuer.name}) accepted mission ${ticketId}`);
 
@@ -1049,7 +962,7 @@ async function handleAcceptMissionById(
 
   } catch (error) {
     console.error('[Telegram] Error accepting mission:', error);
-    await bot.sendMessage(chatId, '❌ Có lỗi xảy ra. Vui lòng thử lại.');
+    await bot.sendMessage(chatId, t('genericError', lang));
   }
 }
 
@@ -1072,20 +985,20 @@ function extractTelegramUserId(rawMessage: string): number | null {
   return null;
 }
 
-function formatWorkflowResult(result: unknown): string {
+function formatWorkflowResult(result: unknown, lang: Language = 'vi'): string {
   const resultStr = String(result);
   
   // Simple formatting without Markdown to avoid parsing issues
-  let formatted = '📋 Kết quả xử lý:\n\n';
+  let formatted = t('workflowResult', lang);
   formatted += resultStr;
   
   return formatted;
 }
 
-function formatVerificationResult(result: unknown): string {
+function formatVerificationResult(result: unknown, lang: Language = 'vi'): string {
   const resultStr = String(result);
   
-  let formatted = '🔍 Kết quả xác thực:\n\n';
+  let formatted = t('verificationResult', lang);
   formatted += resultStr;
   
   return formatted;
