@@ -89,7 +89,7 @@ async function scoutRescuers(
 
 export const scoutRescuersTool = new FunctionTool(scoutRescuers, {
   name: 'scout_rescuers',
-  description: `Tìm kiếm đội cứu hộ đang online và rảnh trong bán kính từ vị trí ticket.`,
+  description: `Search for online and available rescue teams within radius from ticket location.`,
 });
 
 /**
@@ -145,7 +145,7 @@ async function assignRescuer(ticketId: string, rescuerId: string) {
 
 export const assignRescuerTool = new FunctionTool(assignRescuer, {
   name: 'assign_rescuer',
-  description: `Gán một đội cứu hộ cho ticket cứu trợ.`,
+  description: `Assign a rescue team to a rescue ticket.`,
 });
 
 /**
@@ -198,5 +198,5 @@ async function autoMatchRescuer(ticketId: string, radiusKm: number = 5) {
 
 export const autoMatchRescuerTool = new FunctionTool(autoMatchRescuer, {
   name: 'auto_match_rescuer',
-  description: `Tự động tìm và gán rescuer tốt nhất cho ticket.`,
+  description: `Automatically find and assign best rescuer for ticket.`,
 });

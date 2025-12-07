@@ -78,15 +78,15 @@ async function checkDuplicate(
 
 export const deduplicationTool = new FunctionTool(checkDuplicate, {
   name: 'check_duplicate',
-  description: `Kiểm tra xem yêu cầu cứu trợ có bị trùng lặp không.
+  description: `Check if rescue request is duplicate.
   
-  Kiểm tra:
-  1. Số điện thoại đã tồn tại trong ticket đang xử lý
-  2. Vị trí gần với ticket khác trong bán kính 50m
+  Checks:
+  1. Phone number exists in active tickets
+  2. Location within 50m radius of another ticket
   
-  Kết quả:
+  Result:
   - is_duplicate: true/false
-  - action: 'skip', 'merge', hoặc 'create'`,
+  - action: 'skip', 'merge', or 'create'`,
 });
 
 /**
@@ -154,7 +154,7 @@ async function mergeTicketInfo(
 
 export const mergeTicketTool = new FunctionTool(mergeTicketInfo, {
   name: 'merge_ticket_info',
-  description: `Gộp thông tin mới vào ticket đã tồn tại.`,
+  description: `Merge new information into existing ticket.`,
 });
 
 /**
@@ -248,21 +248,21 @@ async function createRescueTicket(
 
 export const createTicketTool = new FunctionTool(createRescueTicket, {
   name: 'create_rescue_ticket',
-  description: `Tạo Rescue Ticket mới sau khi đã phân tích và kiểm tra trùng lặp.
+  description: `Create new Rescue Ticket after analysis and duplicate check.
   
-  Cần cung cấp:
-  - phone: Số điện thoại liên hệ
-  - lat, lng: Tọa độ GPS
-  - addressText: Địa chỉ dạng text
-  - peopleCount: Số người cần cứu
-  - priority: Mức độ ưu tiên (1-5)
-  - rawMessage: Tin nhắn gốc
-  - hasElderly, hasChildren, hasDisabled: Có người già/trẻ em/khuyết tật
-  - note: Ghi chú thêm
-  - telegramUserId: ID người dùng Telegram (nếu có)
+  Required:
+  - phone: Contact phone number
+  - lat, lng: GPS coordinates
+  - addressText: Text address
+  - peopleCount: Number of people to rescue
+  - priority: Priority level (1-5)
+  - rawMessage: Original message
+  - hasElderly, hasChildren, hasDisabled: Has elderly/children/disabled
+  - note: Additional notes
+  - telegramUserId: Telegram user ID (if any)
   
-  GỌI TOOL NÀY SAU KHI ĐÃ:
-  1. parse_sos_message - Phân tích tin nhắn
-  2. geocode_address - Lấy tọa độ
-  3. check_duplicate - Kiểm tra trùng lặp (action='create')`,
+  CALL THIS TOOL AFTER:
+  1. parse_sos_message - Parse message
+  2. geocode_address - Get coordinates
+  3. check_duplicate - Check duplicate (action='create')`,
 });

@@ -345,15 +345,15 @@ async function verifyRescueImage(imageUrl: string, ticketId: string) {
 
 export const visionVerifyTool = new FunctionTool(verifyRescueImage, {
   name: 'verify_rescue_image',
-  description: `Xác thực ảnh báo cáo hoàn thành nhiệm vụ cứu hộ bằng Gemini Vision AI.
+  description: `Verify rescue mission completion photo using Gemini Vision AI.
   
-  Kiểm tra các tiêu chí:
-  - Human Detection: Có người trong ảnh không? (>80% confidence)
-  - Flood Scene: Bối cảnh có phải lũ lụt không? (>70% confidence)
-  - Metadata: GPS và thời gian có khớp không?
-  - Duplicate: Ảnh có bị trùng không?
+  Checks criteria:
+  - Human Detection: Are there people in photo? (>80% confidence)
+  - Flood Scene: Is context a flood scene? (>70% confidence)
+  - Metadata: Do GPS and time match?
+  - Duplicate: Has photo been used before?
   
-  Kết quả: VALID nếu tổng điểm >= 65%`,
+  Result: VALID if total score >= 65%`,
 });
 
 /**
@@ -406,7 +406,7 @@ async function updateTicketVerification(
 
 export const updateTicketVerificationTool = new FunctionTool(updateTicketVerification, {
   name: 'update_ticket_verification',
-  description: `Cập nhật kết quả xác thực ảnh vào ticket và chuyển trạng thái.`,
+  description: `Update photo verification result to ticket and change status.`,
 });
 
 /**
@@ -479,5 +479,5 @@ async function completeMission(ticketId: string) {
 
 export const completeMissionTool = new FunctionTool(completeMission, {
   name: 'complete_mission',
-  description: `Hoàn tất nhiệm vụ cứu hộ sau khi đã xác thực.`,
+  description: `Complete rescue mission after verification.`,
 });

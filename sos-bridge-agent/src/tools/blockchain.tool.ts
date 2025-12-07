@@ -263,8 +263,8 @@ async function getTreasuryBalance(): Promise<TreasuryInfo | { success: false; me
 
 export const getTreasuryBalanceTool = new FunctionTool(getTreasuryBalance, {
   name: 'get_treasury_balance',
-  description: `Kiểm tra số dư USDC trong ví Treasury trên Base Sepolia.
-  Trả về: wallet address, balance USDC, total disbursed, network info.`,
+  description: `Check USDC balance in Treasury wallet on Base Sepolia.
+  Returns: wallet address, USDC balance, total disbursed, network info.`,
 });
 
 /**
@@ -490,15 +490,15 @@ async function releaseFund(
 
 export const releaseFundTool = new FunctionTool(releaseFund, {
   name: 'release_fund',
-  description: `Chuyển USDC từ Treasury đến ví đội cứu hộ trên Base Sepolia.
+  description: `Transfer USDC from Treasury to rescue team wallet on Base Sepolia.
   
   Parameters:
-  - ticketId: ID của ticket cứu hộ (bắt buộc)
-  - rescuerId: ID của rescuer (bắt buộc)
-  - rescuerWallet: Địa chỉ ví Ethereum 0x... (bắt buộc)
-  - amountUsdc: Số tiền USDC (mặc định 20, tối đa 1000)
+  - ticketId: Rescue ticket ID (required)
+  - rescuerId: Rescuer ID (required)
+  - rescuerWallet: Ethereum wallet address 0x... (required)
+  - amountUsdc: USDC amount (default 20, max 1000)
   
-  Có retry mechanism và error handling đầy đủ.`,
+  Has retry mechanism and full error handling.`,
 });
 
 /**
@@ -550,12 +550,12 @@ async function logTransaction(
 
 export const logTransactionTool = new FunctionTool(logTransaction, {
   name: 'log_transaction',
-  description: `Ghi nhận và cập nhật thông tin transaction.
+  description: `Record and update transaction information.
   
   Parameters:
-  - txId: ID của transaction trong hệ thống
-  - txHash: (optional) Transaction hash trên blockchain
-  - status: (optional) Trạng thái mới: PENDING, SUBMITTED, CONFIRMED, FAILED`,
+  - txId: Transaction ID in system
+  - txHash: (optional) Transaction hash on blockchain
+  - status: (optional) New status: PENDING, SUBMITTED, CONFIRMED, FAILED`,
 });
 
 /**
@@ -580,7 +580,7 @@ async function getTransactionByTicket(ticketId: string): Promise<{
 
 export const getTransactionByTicketTool = new FunctionTool(getTransactionByTicket, {
   name: 'get_transaction_by_ticket',
-  description: `Lấy danh sách transactions theo ticket ID.`,
+  description: `Get list of transactions by ticket ID.`,
 });
 
 /**
@@ -644,11 +644,11 @@ async function verifyWalletAddress(
 
 export const verifyWalletAddressTool = new FunctionTool(verifyWalletAddress, {
   name: 'verify_wallet_address',
-  description: `Kiểm tra địa chỉ ví Ethereum có hợp lệ không.
+  description: `Check if Ethereum wallet address is valid.
   
   Parameters:
-  - address: Địa chỉ ví cần kiểm tra
-  - checkActivity: (optional) Nếu true, sẽ kiểm tra thêm lịch sử giao dịch trên blockchain`,
+  - address: Wallet address to check
+  - checkActivity: (optional) If true, also check transaction history on blockchain`,
 });
 
 /**
@@ -692,6 +692,6 @@ async function checkNetworkStatus(): Promise<{
 
 export const checkNetworkStatusTool = new FunctionTool(checkNetworkStatus, {
   name: 'check_network_status',
-  description: `Kiểm tra trạng thái kết nối blockchain Base Sepolia.
-  Trả về: connection status, chain ID, block number, gas price.`,
+  description: `Check blockchain Base Sepolia connection status.
+  Returns: connection status, chain ID, block number, gas price.`,
 });

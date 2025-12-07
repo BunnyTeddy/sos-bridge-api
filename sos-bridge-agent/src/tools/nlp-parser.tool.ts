@@ -119,19 +119,19 @@ async function parseSosMessage(message: string): Promise<ParsedData & { telegram
  */
 export const nlpParserTool = new FunctionTool(parseSosMessage, {
   name: 'parse_sos_message',
-  description: `Phân tích tin nhắn cầu cứu tiếng Việt và trích xuất thông tin quan trọng.
+  description: `Parse rescue message and extract important information.
   
-  Công cụ này giúp:
-  - Trích xuất địa chỉ/vị trí (xóm, thôn, xã, huyện, tỉnh)
-  - Tìm số điện thoại liên hệ
-  - Đếm số người cần cứu
-  - Phát hiện người già, trẻ em, người khuyết tật
-  - Đánh giá mức độ khẩn cấp dựa trên từ khóa
+  This tool helps:
+  - Extract address/location (hamlet, village, commune, district, province)
+  - Find contact phone number
+  - Count people to rescue
+  - Detect elderly, children, disabled persons
+  - Assess urgency level based on keywords
   
-  Mức độ khẩn cấp:
-  - 5: Rất nguy cấp (nước lên mái, sắp chìm)
-  - 4: Nguy cấp cao (nước lên ngang người)
-  - 3: Trung bình (nước ngập sân, cô lập)
-  - 2: Thấp (cần lương thực, thuốc)
-  - 1: Thông tin chung`,
+  Urgency levels:
+  - 5: Critical (water at roof, about to sink)
+  - 4: High (chest-high water)
+  - 3: Medium (yard flooded, isolated)
+  - 2: Low (need food, medicine)
+  - 1: General information`,
 });

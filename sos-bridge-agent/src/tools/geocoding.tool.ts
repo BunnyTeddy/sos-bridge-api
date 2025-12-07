@@ -342,14 +342,14 @@ async function geocodeAddress(address: string, useApi: boolean = true) {
  */
 export const geocodingTool = new FunctionTool(geocodeAddress, {
   name: 'geocode_address',
-  description: `Chuyển đổi địa chỉ văn bản thành tọa độ GPS (latitude, longitude).
+  description: `Convert text address to GPS coordinates (latitude, longitude).
   
-  Hỗ trợ:
-  - Địa chỉ tiếng Việt (xóm, thôn, xã, huyện, tỉnh)
-  - Địa danh phổ biến miền Trung Việt Nam
-  - Tự động gọi Nominatim API (OpenStreetMap) nếu không tìm thấy local
-  - Caching kết quả để tăng tốc độ
-  - Rate limiting để tuân thủ Nominatim policy`,
+  Supports:
+  - Vietnamese addresses (hamlet, village, commune, district, province)
+  - Common locations in Central Vietnam
+  - Auto-fallback to Nominatim API (OpenStreetMap) if local not found
+  - Result caching for speed
+  - Rate limiting for Nominatim policy compliance`,
 });
 
 // ============ DISTANCE CALCULATOR ============
@@ -385,7 +385,7 @@ function toRad(deg: number): number {
 
 export const distanceCalculatorTool = new FunctionTool(calculateDistanceBetweenPoints, {
   name: 'calculate_distance',
-  description: 'Tính khoảng cách giữa 2 điểm GPS (đơn vị km và m)',
+  description: 'Calculate distance between 2 GPS points (in km and m)',
 });
 
 // ============ EXPORTS ============

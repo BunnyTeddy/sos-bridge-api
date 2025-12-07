@@ -125,7 +125,7 @@ async function notifyRescuer(ticketId: string, rescuerId: string) {
 
 export const notifyRescuerTool = new FunctionTool(notifyRescuer, {
   name: 'notify_rescuer',
-  description: `Gửi thông báo nhiệm vụ mới đến đội cứu hộ.`,
+  description: `Send new mission notification to rescue team.`,
 });
 
 /**
@@ -173,7 +173,7 @@ async function notifyVictim(ticketId: string, victimPhone?: string) {
 
 export const notifyVictimTool = new FunctionTool(notifyVictim, {
   name: 'notify_victim',
-  description: `Gửi thông báo xác nhận cho người báo tin/nạn nhân.`,
+  description: `Send confirmation notification to reporter/victim.`,
 });
 
 /**
@@ -214,7 +214,7 @@ async function notifyCompletion(ticketId: string) {
 
 export const notifyCompletionTool = new FunctionTool(notifyCompletion, {
   name: 'notify_completion',
-  description: `Gửi thông báo xác nhận nhiệm vụ hoàn thành.`,
+  description: `Send mission completion confirmation notification.`,
 });
 
 /**
@@ -273,5 +273,5 @@ Mọi đội cứu hộ trong khu vực xin hãy phản hồi!
 
 export const broadcastAlertTool = new FunctionTool(broadcastEmergencyAlert, {
   name: 'broadcast_emergency_alert',
-  description: `Phát cảnh báo khẩn cấp đến tất cả rescuers trong vùng.`,
+  description: `Broadcast emergency alert to all rescuers in the area.`,
 });
