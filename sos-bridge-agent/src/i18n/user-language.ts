@@ -10,7 +10,7 @@ import { Language } from './messages.js';
 const userLanguages = new Map<string, Language>();
 
 // Default language
-const DEFAULT_LANGUAGE: Language = 'vi';
+const DEFAULT_LANGUAGE: Language = 'en';
 
 /**
  * Get user's preferred language
@@ -42,4 +42,5 @@ export function isValidLanguage(lang: string): lang is Language {
 export function getSupportedLanguages(): Language[] {
   return ['en', 'vi'];
 }
+
 
